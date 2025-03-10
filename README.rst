@@ -1,3 +1,11 @@
+### Download package.tgz
+[Download package.tgz from Google Drive] (https://drive.google.com/file/d/1VuCBo60pwbYmYEdPzgKEwJ32CYJ9V5tb/view?usp=sharing)
+
+
+This is a modified version of the MNIST-pytorch exmaple from FEDn studios.
+
+
+
 FEDn Project: MNIST (PyTorch)
 -----------------------------
 
