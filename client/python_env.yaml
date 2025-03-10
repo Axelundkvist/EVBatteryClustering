@@ -1,0 +1,14 @@
+name: battery-soh-env
+build_dependencies:
+  - pip
+  - setuptools
+  - wheel
+dependencies:
+  - fedn
+  - torch
+  - torchvision
+  - torchaudio
+  - numpy
+  - pandas
+  - scikit-learn
+  - pyyaml
