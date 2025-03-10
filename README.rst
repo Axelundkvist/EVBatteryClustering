@@ -2,7 +2,7 @@
 [Download package.tgz from Google Drive] (https://drive.google.com/file/d/1VuCBo60pwbYmYEdPzgKEwJ32CYJ9V5tb/view?usp=sharing)
 
 
-This is a modified version of the MNIST-pytorch exmaple from FEDn studios.
+This is a modified version of the MNIST-pytorch exmaple from FEDn studios for a attempt in creating a training based on a temperature condition
 
 
 
