@@ -4,3 +4,27 @@ data
 *.tar.gz
 .mnist-pytorch
 client.yaml
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*.so
+
+# Virtual environments
+env/
+venv/
+fedn-env/
+fedn_env/
+
+# macOS system files
+.DS_Store
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# VSCode settings (optional)
+.vscode/
+
+# Logs
+*.log
+
