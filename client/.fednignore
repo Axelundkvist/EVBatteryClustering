@@ -1,3 +1,18 @@
-__pycache__
-.mnist-pytorch
-data
+__pycache__ /
+*.pyc
+*.pyo
+*.pyd
+*.tgz
+*.npz
+
+# Ignore local datasets
+data /
+
+# Ignore virtual environments (adjust name if needed)
+battery - soh - env /
+                fedn -
+env /
+
+# Ignore model artifacts
+package.tgz
+seed.npz
