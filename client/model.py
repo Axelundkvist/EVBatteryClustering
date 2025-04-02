@@ -8,6 +8,8 @@ HELPER_MODULE = "numpyhelper"
 helper = get_helper(HELPER_MODULE)
 
 
+## model class name should be BatterySoHModel
+
 class BatterySoHModel(torch.nn.Module):
     def __init__(self, input_dim=6):  # 6 features in dataset
         super(BatterySoHModel, self).__init__()
@@ -25,31 +27,6 @@ def compile_model():
     """ Create a fresh model instance with the correct input size. """
     return BatterySoHModel(input_dim=6)  # Ensure input size matches dataset
 
-
-'''
-def compile_model():
-    """Compile the pytorch model.
-
-    :return: The compiled model.
-    :rtype: torch.nn.Module
-    """
-
-    class Net(torch.nn.Module):
-        def __init__(self):
-            super(Net, self).__init__()
-            self.fc1 = torch.nn.Linear(784, 64)
-            self.fc2 = torch.nn.Linear(64, 32)
-            self.fc3 = torch.nn.Linear(32, 10)
-
-        def forward(self, x):
-            x = torch.nn.functional.relu(self.fc1(x.reshape(x.size(0), 784)))
-            x = torch.nn.functional.dropout(x, p=0.5, training=self.training)
-            x = torch.nn.functional.relu(self.fc2(x))
-            x = torch.nn.functional.log_softmax(self.fc3(x), dim=1)
-            return x
-
-    return Net()
-'''
 
 def save_parameters(model, out_path):
     """Save model paramters to file.
