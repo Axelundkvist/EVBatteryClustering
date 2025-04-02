@@ -15,9 +15,9 @@ import traceback
 
 TEMP_THRESHOLD = -100  # Define later based on observations
 
-data_path = os.environ.get('DATA_PATH')
+data_path = os.environ.get('FEDN_DATA_PATH')
 if data_path is None:
-    raise ValueError("DATA_PATH environment variable not set!")
+    raise ValueError("FEDN_DATA_PATH environment variable not set!")
 
 print(f"Training with dataset: {data_path}")
 print(f"WOAH - MASSIVE MESSAGE FROM TRAIN.PY PLZ WORK YEAH")
@@ -33,9 +33,9 @@ def train(in_model_path, out_model_path):
         print(os.path.exists(in_model_path))
         print(os.path.getsize(in_model_path))
         
-        data_path = os.environ.get('DATA_PATH')
+        data_path = os.environ.get('FEDN_DATA_PATH')
         if data_path is None:
-            raise ValueError("DATA_PATH environment variable not set!")
+            raise ValueError("FEDN_DATA_PATH environment variable not set!")
 
         print(f"Training with dataset: {data_path}")
         

@@ -11,10 +11,10 @@ import numpy as np
 dir_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.abspath(dir_path))
 
-# Load DATA_PATH from environment variable
-data_path = os.environ.get('DATA_PATH')
+# Load FEDN_DATA_PATH from environment variable
+data_path = os.environ.get('FEDN_DATA_PATH')
 if data_path is None:
-    raise ValueError("DATA_PATH environment variable not set!")
+    raise ValueError("FEDN_DATA_PATH environment variable not set!")
 
 print(f"[DEBUG] validate.py running with sys.argv: {sys.argv}")
 

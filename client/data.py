@@ -229,3 +229,19 @@ def load_data(data_path, is_train=True):
         )
 '''
 
+
+
+'''
+
+to train things locally try and do things like
+
+python train.py ../seed.npz ../model_update.npz --data_path data/clients/1/mnist.pt
+python validate.py ../model_update.npz ../validation.json --data_path data/clients/1/mnist.pt
+
+
+python train.py ../seed.npz ../model_update.npz --data_path "/Users/Axel/Documents/Master/MasterThesis/DataSets/IndianFleetData/BatteryFleetData/device_54309277.csv"
+
+
+
+
+'''
