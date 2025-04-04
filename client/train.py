@@ -92,7 +92,7 @@ def train(in_model_path, out_model_path):
         criterion = torch.nn.MSELoss()
 
         lr = 0.01
-        epochs = 3
+        epochs = 2
         batch_size = 32
         n_batches = int(math.ceil(len(X_train_tensor) / batch_size))
 

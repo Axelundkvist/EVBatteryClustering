@@ -3,6 +3,9 @@ from fedn.network.combiner.hooks.serverfunctionsbase import ServerFunctionsBase
 from fedn.network.combiner.hooks.allowed_import import Dict, List, ServerFunctionsBase, Tuple, np, random
 
 
+#from clustering import cluster_clients
+
+
 ## dessa kan du inte ta med
 #from sklearn.cluster import AffinityPropagation
 #from sklearn.metrics import silhouette_score
@@ -48,7 +51,14 @@ class ServerFunctions(ServerFunctionsBase):
         try:
             client_ids = list(client_updates.keys())
             cluster_clients = {}
-
+            
+            
+            # här är din clustering.py algoritm du kommer använda sen
+            #self.client_clusters = cluster_clients(client_updates)
+            
+            
+            #bortkommenterad eftersom du vill inkludera din nya clustering.py algoritm
+            # just nu är den inte bortkommenterad dock
             for cid in client_ids:
                 metadata = client_updates[cid][1]
                 temp = metadata.get("temperature_avg", 25) # sets default value to 25 if not getting a value
