@@ -4,6 +4,11 @@ import torch.optim as optim
 import numpy as np
 import random
 from typing import List, Dict
+import collections
+from fedn.utils.helpers.helpers import get_helper
+
+HELPER_MODULE = "numpyhelper"
+helper = get_helper(HELPER_MODULE)
 
 # =============================================================================
 # Utility Functions
@@ -23,29 +28,36 @@ def init_seed(seed_file: str):
         torch.cuda.manual_seed_all(seed_value)
     print(f"Seed initialized to {seed_value} from {seed_file}.")
 
-def compile_model(device: str = "cpu") -> nn.Module:
+def compile_model() -> nn.Module:
     """
-    Instantiate and compile the BatterySOHEstimator model and move it to the specified device.
+    Instantiate and compile the BatterySOHEstimator model.
     """
     model = BatterySOHEstimator()
+    device = "cuda" if torch.cuda.is_available() else "cpu"
     model.to(device)
     print(f"Model compiled and moved to {device}.")
     return model
 
 def save_parameters(model: nn.Module, file_path: str):
     """
-    Save the model's state_dict to the given file path.
+    Save model parameters to file using the helper module.
     """
-    torch.save(model.state_dict(), file_path)
+    parameters_np = [val.cpu().numpy() for _, val in model.state_dict().items()]
+    helper.save(parameters_np, file_path)
     print(f"Model parameters saved to {file_path}.")
 
 def load_parameters(model: nn.Module, file_path: str, public_keys: List[str] = None):
     """
-    Load model parameters from the file. If public_keys is provided, update only those keys,
+    Load model parameters from file using the helper module.
+    If public_keys is provided, update only those keys,
     leaving other parameters (private parameters) unchanged.
     """
-    loaded_state = torch.load(file_path, map_location="cpu")
+    parameters_np = helper.load(file_path)
     current_state = model.state_dict()
+    
+    # Convert numpy parameters back to tensors
+    params_dict = zip(current_state.keys(), parameters_np)
+    loaded_state = collections.OrderedDict({key: torch.tensor(x) for key, x in params_dict})
     
     if public_keys is not None:
         # Update only keys in public_keys
@@ -124,9 +136,11 @@ if __name__ == "__main__":
     init_seed("../seed.npz")
     
     # Example: compile the model and test on dummy data.
-    model = compile_model(device="cpu")
+    
+    #device="cpu"
+    model = compile_model()
     
     # Create a dummy batch: 10 samples, 6 features each.
     #dummy_input = torch.randn(10, 6)
     #predictions = model(dummy_input)
-    print("Predicted SOH:", predictions.detach().numpy())
+    

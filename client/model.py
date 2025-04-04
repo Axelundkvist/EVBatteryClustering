@@ -52,10 +52,10 @@ def load_parameters(model_path):
     parameters_np = helper.load(model_path)
 
     params_dict = zip(model.state_dict().keys(), parameters_np)
-    state_dict = collections.OrderedDict({key: torch.tensor(x) for key, x in params_dict})
+    state_dict = collections.OrderedDict({key: torch.tensor(x, dtype=torch.float32) for key, x in params_dict})
     model.load_state_dict(state_dict, strict=True)
     return model
-
+    
 
 def init_seed(out_path="seed.npz"):
     """Initialize seed model and save it to file.
