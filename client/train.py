@@ -20,7 +20,6 @@ if data_path is None:
     raise ValueError("FEDN_DATA_PATH environment variable not set!")
 
 print(f"Training with dataset: {data_path}")
-print(f"WOAH - MASSIVE MESSAGE FROM TRAIN.PY PLZ WORK YEAH")
 
 
 '''
@@ -43,7 +42,7 @@ def train(in_model_path, out_model_path):
         print(f"[DEBUG] Output model path (FEDn expects model here): {out_model_path}")
 
         # --- Load and preprocess data ---
-        print("[DEBUG] Loading and preprocessing data...")
+        print("[DEBUG] ===== Loading and preprocessing data...")
         X_train, y_train, recent_stats = load_data(data_path, is_train=True)
         
         print("[DEBUG] Data returned from load_data():")
@@ -83,7 +82,7 @@ def train(in_model_path, out_model_path):
         y_train_tensor = torch.tensor(y_train, dtype=torch.float32).view(-1, 1)
 
         # --- Load model ---
-        print("[DEBUG] Loading model parameters...")
+        print("[DEBUG] ===== Loading model parameters...")
         model = load_parameters(in_model_path)
         
 
@@ -127,7 +126,7 @@ def train(in_model_path, out_model_path):
 
         save_metadata(metadata, out_model_path)
         save_parameters(model, out_model_path)
-        print(f"[DEBUG] Model saved to: {out_model_path}, Exists: {os.path.exists(out_model_path)}")
+        print(f"[DEBUG] ===== Model saved to: {out_model_path}, Exists: {os.path.exists(out_model_path)}")
         
         if not os.path.exists(out_model_path):
             raise FileNotFoundError(f"❌ Model file was not saved to: {out_model_path}")
