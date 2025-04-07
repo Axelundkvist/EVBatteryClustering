@@ -8,15 +8,27 @@ import pandas as pd
 import numpy as np
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
+import os
+import sys
 
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 abs_path = os.path.abspath(dir_path)
 
 
-import os
-import sys
-import pandas as pd
+FEATURE_COLUMNS = [
+    'ibmu_statspkblkvoltavg', #1
+    'ibmu_statspkcurr', #2
+    'ibmu_algopksoctrue', #3
+    'ibmu_statspktempcellmax', #4
+    'ibmu_statspktempcellmin', #5
+    'impb_coolttemp', #6
+    'ivcu_ambairtemp', #7
+    'ibmu_wntytotkwhrgn' #8
+
+]
+TARGET_COLUMN = 'ibmu_algopksoh'
+
 
 def data_init():
     """
@@ -55,74 +67,122 @@ data_path = os.environ.get('FEDN_DATA_PATH')
 if data_path is None:
     raise ValueError("FEDN_DATA_PATH environment variable not set!")
 print(f"[DEBUG] data.py running with sys.argv: {sys.argv}")
-print(f"WOAH - MASSIVE MESSAGE FROM DATA.PY PLZ WORK")
-
 
 def estimate_soh(cycles, temp, fast_charges):
     """ Compute State of Health (SoH) based on charge cycles, temperature, and fast charges. """
     return np.maximum(100 - 0.03 * cycles - 0.01 * (cycles**1.2) - 2 * np.exp(-0.005 * temp) - 0.5 * fast_charges, 50)
 
 
+
+
 def load_data(filepath, is_train=True):
     """Load and preprocess the Indian Fleet dataset for a specific EV client."""
     print(f"[DEBUG] Loading data from {filepath}")
 
-    try:
-        chunk_size = 80000
-        chunk_iter = pd.read_csv(filepath, chunksize=chunk_size)
-        df = next(chunk_iter)
+    # check if the data is from the Indian Fleet Data
+    if "IndianFleetData" in filepath:
+        try:
+            chunk_size = 80000
+            chunk_iter = pd.read_csv(filepath, chunksize=chunk_size)
+            df = next(chunk_iter)
 
-        df['timestamp'] = pd.to_datetime(df['date'] + ' ' + df['time'], dayfirst=True, errors='coerce')
-        df = df.sort_values('timestamp')
-        df = df.dropna(subset=["timestamp"])
+            df['timestamp'] = pd.to_datetime(df['date'] + ' ' + df['time'], dayfirst=True, errors='coerce')
+            df = df.sort_values('timestamp')
+            df = df.dropna(subset=["timestamp"])
 
-        time_cutoff = df['timestamp'].max() - pd.Timedelta(days=14)
-        recent_data = df[df['timestamp'] > time_cutoff]
-        recent_stats = {
-            "temperature_avg": recent_data["batTemp"].mean() if not recent_data.empty else 0.0,
-            "batMaxTemp_avg": recent_data["batMaxTemp"].mean() if not recent_data.empty else 0.0,
-            "socPercent_avg": recent_data["socPercent"].mean() if not recent_data.empty else 0.0,
-            "chargeCycle_std": recent_data["chargeCycle"].std() if not recent_data.empty else 0.0
-        }
+            time_cutoff = df['timestamp'].max() - pd.Timedelta(days=14)
+            recent_data = df[df['timestamp'] > time_cutoff]
+            recent_stats = {
+                "temperature_avg": recent_data["batTemp"].mean() if not recent_data.empty else 0.0,
+                "batMaxTemp_avg": recent_data["batMaxTemp"].mean() if not recent_data.empty else 0.0,
+                "socPercent_avg": recent_data["socPercent"].mean() if not recent_data.empty else 0.0,
+                "chargeCycle_std": recent_data["chargeCycle"].std() if not recent_data.empty else 0.0
+            }
 
-        feature_columns = ["chargeCycle", "batVolt", "batCurrent", "socPercent", "batTemp", "batMaxTemp"]
-        df = df.dropna(subset=feature_columns)
+            feature_columns = ["chargeCycle", "batVolt", "batCurrent", "socPercent", "batTemp", "batMaxTemp"]
+            df = df.dropna(subset=feature_columns)
 
-        if "fastChargeCount" in df.columns:
-            fast_charges = df["fastChargeCount"].values
-        else:
-            fast_charges = np.random.randint(0, 5, size=len(df))
+            if "fastChargeCount" in df.columns:
+                fast_charges = df["fastChargeCount"].values
+            else:
+                fast_charges = np.random.randint(0, 5, size=len(df))
 
-        X = df[feature_columns].values.astype(np.float32)
-        y = estimate_soh(df["chargeCycle"].values, df["batTemp"].values, fast_charges)
+            X = df[feature_columns].values.astype(np.float32)
+            y = estimate_soh(df["chargeCycle"].values, df["batTemp"].values, fast_charges)
 
-        if is_train:
-            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1)
-            print(f"[DEBUG] Loaded {len(X_train)} training samples, {len(X_test)} test samples.")
-            return X_train, y_train, recent_stats
-        else:
-            print(f"[DEBUG] Loaded {len(X)} samples for evaluation.")
-            return X, y, recent_stats
+            if is_train:
+                X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1)
+                print(f"[DEBUG] Loaded {len(X_train)} training samples, {len(X_test)} test samples.")
+                return X_train, y_train, recent_stats
+            else:
+                print(f"[DEBUG] Loaded {len(X)} samples for evaluation.")
+                return X, y, recent_stats
 
-    except Exception as e:
-        print(f"[ERROR] Failed to load or process data from {filepath}")
-        print(f"[DEBUG] Exception: {e}")
-        raise e
+        except Exception as e:
+            print(f"[ERROR] Failed to load or process data from {filepath}")
+            print(f"[DEBUG] Exception: {e}")
+            raise e
+
+    # if the data is not from the Indian Fleet Data, then it is from the US Fleet Data
+    else:
+        try:
+            chunk_size = 80000
+            chunk_iter = pd.read_csv(filepath, chunksize=chunk_size)
+            df = next(chunk_iter)
+
+            df['timestamp'] = pd.to_datetime(df['date'] + ' ' + df['time'], dayfirst=True, errors='coerce')            
+            df = df.sort_values('timestamp')
+            df_ma = df[FEATURE_COLUMNS].rolling(window='14D', min_periods=1).mean()
+            df[FEATURE_COLUMNS] = df_ma
+            df = df.dropna(subset=["timestamp"])
+
+            time_cutoff = df['timestamp'].max() - pd.Timedelta(days=14)
+            recent_data = df[df['timestamp'] > time_cutoff]
+            
+            '''recent_stats = {
+                "temperature_avg": recent_data["batTemp"].mean() if not recent_data.empty else 0.0,
+                "batMaxTemp_avg": recent_data["batMaxTemp"].mean() if not recent_data.empty else 0.0,
+                "socPercent_avg": recent_data["socPercent"].mean() if not recent_data.empty else 0.0,
+                "chargeCycle_std": recent_data["chargeCycle"].std() if not recent_data.empty else 0.0
+            }'''
+            
+            recent_stats = {
+                "ambairtemp": recent_data["ivcu_ambairtemp"].mean() if not recent_data.empty else 0.0,
+                "ibmu_statspkblkvoltavg_avg": recent_data["ibmu_statspkblkvoltavg"].mean() if not recent_data.empty else 0.0,
+                "ibmu_statspkcurr_avg": recent_data["ibmu_statspkcurr"].mean() if not recent_data.empty else 0.0,
+                "ibmu_algopksoctrue_avg": recent_data["ibmu_algopksoctrue"].mean() if not recent_data.empty else 0.0,
+                "ibmu_statspktempcellmax": recent_data["ibmu_statspktempcellmax"] if not recent_data.empty else 0.0,
+                "ibmu_statspktempcellmin": recent_data["ibmu_statspktempcellmin"] if not recent_data.empty else 0.0,
+                "impb_coolttemp_avg": recent_data["impb_coolttemp"].mean() if not recent_data.empty else 0.0,
+                "ibmu_wntytotkwhrgn_avg": recent_data["ibmu_wntytotkwhrgn"].mean() if not recent_data.empty else 0.0
+            }
+            
+            feature_columns = FEATURE_COLUMNS
+            df = df.dropna(subset=feature_columns)
+
+            # standardize the data
+            X = df[feature_columns].values.astype(np.float32)
+            scaler = StandardScaler()
+            X_scaled = scaler.fit_transform(X)
+            y = df[TARGET_COLUMN].values.astype(np.float32)
+            
+            # check if the data is being used for training or evaluation    
+            if is_train:
+                X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.1)
+                print(f"[DEBUG] Loaded {len(X_train)} training samples, {len(X_test)} test samples.")
+                return X_train, y_train, recent_stats
+            else:
+                print(f"[DEBUG] Loaded {len(X_scaled)} samples for evaluation.")
+                return X_scaled, y, recent_stats
+        
+        # if there is an error, print the error and raise it
+        except Exception as e:
+            print(f"[ERROR] Failed to load or process data from {filepath}")
+            print(f"[DEBUG] Exception: {e}")
+            raise e
 
 
-def check_training_eligibility(filepath, temp_threshold):
-    """ Check if a client should participate in training based on temperature conditions. """
-    df = pd.read_csv(filepath)
-    
-    # Compute 14-day mean temperature
-    df['date'] = pd.to_datetime(df['date'])
-    last_14_days = df.sort_values(by='date', ascending=False).head(14)
-    mean_temp = last_14_days['batMaxTemp'].mean()
-
-    return mean_temp > temp_threshold  # Returns True if threshold exceeded
-
-
-
+# if the file is run directly, print the data path and load the data
 if __name__ == "__main__":
     #print("\n\n[DEBUG] ===== Starting load_data() via __main__ =====\n\n")
     data_path = os.getenv("FEDN_DATA_PATH")
@@ -136,7 +196,7 @@ if __name__ == "__main__":
     print(f"[DEBUG] Using dataset at: {data_path}")
 
     try:
-        X, y = load_data(data_path)
+        X, y, recent_stats = load_data(data_path)
         print(f"[DEBUG] ✅ Data loaded successfully!")
         print(f" - X shape: {X.shape}")
         #print(f" - y shape: {y.shape}")
@@ -146,86 +206,4 @@ if __name__ == "__main__":
     
     
         
-'''if __name__ == "__main__":
-print("\n\n[DEBUG] ===== Starting train() via __main__ =====\n\n")
-if len(sys.argv) < 3:
-    print("[ERROR] Not enough arguments provided to train.py")
-    sys.exit(1)
-try:
-    train(sys.argv[1], sys.argv[2], data_path)
-except Exception as e:
-    print("\n\n[ERROR] Something went wrong in main train.py execution!\n")
-    traceback.print_exc()'''
-
-
-'''
-def load_data(data_path, is_train=True):
-    """Load data from disk.
-
-    :param data_path: Path to data file.
-    :type data_path: str
-    :param is_train: Whether to load training or test data.
-    :type is_train: bool
-    :return: Tuple of data and labels.
-    :rtype: tuple
-    """
-    if data_path is None:
-        data_path = os.environ.get("FEDN_DATA_PATH", abs_path + "/data/clients/1/mnist.pt")
-
-    data = torch.load(data_path, weights_only=True)
-
-    if is_train:
-        X = data["x_train"]
-        y = data["y_train"]
-    else:
-        X = data["x_test"]
-        y = data["y_test"]
-
-    # Normalize
-    X = X / 255
-
-    return X, y
-'''
-
-'''def splitset(dataset, parts):
-    n = dataset.shape[0]
-    local_n = floor(n / parts)
-    result = []
-    for i in range(parts):
-        result.append(dataset[i * local_n : (i + 1) * local_n])
-    return result
-'''
-
-'''def split(out_dir="data"):
-    n_splits = int(os.environ.get("FEDN_NUM_DATA_SPLITS", 2))
-
-    # Make dir
-    if not os.path.exists(f"{out_dir}/clients"):
-        os.mkdir(f"{out_dir}/clients")
-
-    # Load and convert to dict
-    train_data = torchvision.datasets.MNIST(root=f"{out_dir}/train", transform=torchvision.transforms.ToTensor, train=True)
-    test_data = torchvision.datasets.MNIST(root=f"{out_dir}/test", transform=torchvision.transforms.ToTensor, train=False)
-    data = {
-        "x_train": splitset(train_data.data, n_splits),
-        "y_train": splitset(train_data.targets, n_splits),
-        "x_test": splitset(test_data.data, n_splits),
-        "y_test": splitset(test_data.targets, n_splits),
-    }
-
-    # Make splits
-    for i in range(n_splits):
-        subdir = f"{out_dir}/clients/{str(i+1)}"
-        if not os.path.exists(subdir):
-            os.mkdir(subdir)
-        torch.save(
-            {
-                "x_train": data["x_train"][i],
-                "y_train": data["y_train"][i],
-                "x_test": data["x_test"][i],
-                "y_test": data["y_test"][i],
-            },
-            f"{subdir}/mnist.pt",
-        )
-'''
 

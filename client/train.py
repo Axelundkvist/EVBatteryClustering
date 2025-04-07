@@ -83,7 +83,11 @@ def train(in_model_path, out_model_path):
 
         # --- Load model ---
         print("[DEBUG] ===== Loading model parameters...")
-        model = load_parameters(in_model_path)
+        if "IndianFleetData" in data_path:
+            model = load_parameters(in_model_path)
+        else:
+            # change this to the new model if you're using the US dataset
+            model = load_parameters(in_model_path)
         
 
         # --- Training setup ---

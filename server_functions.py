@@ -3,9 +3,6 @@ from fedn.network.combiner.hooks.serverfunctionsbase import ServerFunctionsBase
 from fedn.network.combiner.hooks.allowed_import import Dict, List, ServerFunctionsBase, Tuple, np, random
 
 
-#from clustering import cluster_clients
-
-
 ## dessa kan du inte ta med
 #from sklearn.cluster import AffinityPropagation
 #from sklearn.metrics import silhouette_score
@@ -51,20 +48,13 @@ class ServerFunctions(ServerFunctionsBase):
         try:
             client_ids = list(client_updates.keys())
             cluster_clients = {}
-            
-            
-            # här är din clustering.py algoritm du kommer använda sen
-            #self.client_clusters = cluster_clients(client_updates)
-            
-            
-            #bortkommenterad eftersom du vill inkludera din nya clustering.py algoritm
-            # just nu är den inte bortkommenterad dock
+
             for cid in client_ids:
                 metadata = client_updates[cid][1]
-                temp = metadata.get("temperature_avg", 25) # sets default value to 25 if not getting a value
+                temp = metadata.get("ambairtemp", 25) # sets default value to 25 if not getting a value
+                print(f"[DEBUG] ===== temp for client {cid}: {temp}")
 
                 # Rule-based clustering by temperature zone
-                
                 if temp > 35:
                     temp_zone = "hot"
                 elif temp < 15:
@@ -91,7 +81,7 @@ class ServerFunctions(ServerFunctionsBase):
                     new_cluster_models[cluster_id] = aggregated_model
 
                 except Exception as e:
-                    print(f"[ERROR] Failed aggregating cluster {cluster_id}: {e}")
+                    print(f"[ERROR] ===== Failed aggregating cluster {cluster_id}: {e}, line 83")
                     raise
 
             self.cluster_models = new_cluster_models
@@ -106,7 +96,8 @@ class ServerFunctions(ServerFunctionsBase):
             return new_cluster_models[largest_cluster]
 
         except Exception as e:
-            print(f"[ERROR] Failed in aggregate(): {e}")
+            print(f"[ERROR] ===== Failed in aggregate(): {e}")
+            print(f"[ERROR] ===== ")
             raise
 
 def client_settings(self, global_model):
