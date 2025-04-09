@@ -13,3 +13,7 @@ res = client.start_session(name = "temp_only_cluster",rounds=2,server_functions=
 print(f"session started successfully")
 print(res)
 
+print(ServerFunctions.aggregate())
+print(ServerFunctions.client_selection())
+
+

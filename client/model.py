@@ -11,7 +11,6 @@ helper = get_helper(HELPER_MODULE)
 ## model class name should be BatterySoHModel
 
 class BatterySoHModel(torch.nn.Module):
-    # if you're going to start using the US dataset, change the input_dim to 8 or the number of features 
     def __init__(self, input_dim=6):  # 6 features in dataset
         super(BatterySoHModel, self).__init__()
         self.fc1 = torch.nn.Linear(input_dim, 64)

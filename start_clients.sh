@@ -14,7 +14,50 @@ datafiles=(
 "/Users/Axel/Documents/Master/MasterThesis/DataSets/IndianFleetData/BatteryFleetData/device_57622858.csv"
 )
 
+# /Users/Axel/Documents/Master/MasterThesis/DataSets/FieldVehicleData/DataLoadAndConcatination/vehicle1_1min.csv
+# /Users/Axel/Documents/Master/MasterThesis/DataSets/FieldVehicleData/DataLoadAndConcatination/vehicle1_5min.csv
+# /Users/Axel/Documents/Master/MasterThesis/DataSets/FieldVehicleData/DataLoadAndConcatination/vehicle2_1min.csv
+# /Users/Axel/Documents/Master/MasterThesis/DataSets/FieldVehicleData/DataLoadAndConcatination/vehicle2_5min.csv
+# /Users/Axel/Documents/Master/MasterThesis/DataSets/FieldVehicleData/DataLoadAndConcatination/vehicle3_1min.csv
+# /Users/Axel/Documents/Master/MasterThesis/DataSets/FieldVehicleData/DataLoadAndConcatination/vehicle3_5min.csv
+# /Users/Axel/Documents/Master/MasterThesis/DataSets/FieldVehicleData/DataLoadAndConcatination/vehicle4_1min.csv
+# /Users/Axel/Documents/Master/MasterThesis/DataSets/FieldVehicleData/DataLoadAndConcatination/vehicle4_5min.csv
+# /Users/Axel/Documents/Master/MasterThesis/DataSets/FieldVehicleData/DataLoadAndConcatination/vehicle5_1min.csv
+# /Users/Axel/Documents/Master/MasterThesis/DataSets/FieldVehicleData/DataLoadAndConcatination/vehicle5_5min.csv
+# /Users/Axel/Documents/Master/MasterThesis/DataSets/FieldVehicleData/DataLoadAndConcatination/vehicle6_1min.csv
+# /Users/Axel/Documents/Master/MasterThesis/DataSets/FieldVehicleData/DataLoadAndConcatination/vehicle6_5min.csv
+# /Users/Axel/Documents/Master/MasterThesis/DataSets/FieldVehicleData/DataLoadAndConcatination/vehicle7_1min.csv
+# /Users/Axel/Documents/Master/MasterThesis/DataSets/FieldVehicleData/DataLoadAndConcatination/vehicle7_5min.csv
+# /Users/Axel/Documents/Master/MasterThesis/DataSets/FieldVehicleData/DataLoadAndConcatination/vehicle8_1min.csv
+# /Users/Axel/Documents/Master/MasterThesis/DataSets/FieldVehicleData/DataLoadAndConcatination/vehicle8_5min.csv
+# /Users/Axel/Documents/Master/MasterThesis/DataSets/FieldVehicleData/DataLoadAndConcatination/vehicle9_1min.csv
+# /Users/Axel/Documents/Master/MasterThesis/DataSets/FieldVehicleData/DataLoadAndConcatination/vehicle9_5min.csv
 
+
+
+new1MinAggdatafiles=(
+"/Users/Axel/Documents/Master/MasterThesis/DataSets/FieldVehicleData/Christian_validation_data/vehicle1_1min.csv"
+"/Users/Axel/Documents/Master/MasterThesis/DataSets/FieldVehicleData/Christian_validation_data/vehicle2_1min.csv"
+"/Users/Axel/Documents/Master/MasterThesis/DataSets/FieldVehicleData/Christian_validation_data/vehicle3_1min.csv"
+"/Users/Axel/Documents/Master/MasterThesis/DataSets/FieldVehicleData/Christian_validation_data/vehicle4_1min.csv"
+"/Users/Axel/Documents/Master/MasterThesis/DataSets/FieldVehicleData/Christian_validation_data/vehicle5_1min.csv"
+"/Users/Axel/Documents/Master/MasterThesis/DataSets/FieldVehicleData/Christian_validation_data/vehicle6_1min.csv"
+"/Users/Axel/Documents/Master/MasterThesis/DataSets/FieldVehicleData/Christian_validation_data/vehicle7_1min.csv"
+"/Users/Axel/Documents/Master/MasterThesis/DataSets/FieldVehicleData/Christian_validation_data/vehicle8_1min.csv"
+"/Users/Axel/Documents/Master/MasterThesis/DataSets/FieldVehicleData/Christian_validation_data/vehicle9_1min.csv"
+)
+
+new5MinAggdatafiles=(
+"/Users/Axel/Documents/Master/MasterThesis/DataSets/FieldVehicleData/Christian_validation_data/vehicle1_5min.csv"
+"/Users/Axel/Documents/Master/MasterThesis/DataSets/FieldVehicleData/Christian_validation_data/vehicle2_5min.csv"
+"/Users/Axel/Documents/Master/MasterThesis/DataSets/FieldVehicleData/Christian_validation_data/vehicle3_5min.csv"
+"/Users/Axel/Documents/Master/MasterThesis/DataSets/FieldVehicleData/Christian_validation_data/vehicle4_5min.csv"
+"/Users/Axel/Documents/Master/MasterThesis/DataSets/FieldVehicleData/Christian_validation_data/vehicle5_5min.csv"
+"/Users/Axel/Documents/Master/MasterThesis/DataSets/FieldVehicleData/Christian_validation_data/vehicle6_5min.csv"
+"/Users/Axel/Documents/Master/MasterThesis/DataSets/FieldVehicleData/Christian_validation_data/vehicle7_5min.csv"
+"/Users/Axel/Documents/Master/MasterThesis/DataSets/FieldVehicleData/Christian_validation_data/vehicle8_5min.csv"
+"/Users/Axel/Documents/Master/MasterThesis/DataSets/FieldVehicleData/Christian_validation_data/vehicle9_5min.csv"
+)
 # tokens för norhterly projektet
 
 # tokens=(
@@ -96,6 +139,7 @@ client_id=(
 
 #export FEDN_PACKAGE_EXTRACT_DIR=client/package
 #export FEDN_PACKAGE_EXTRACT_DIR=package
+#export CHUNK_SIZE=80000 # this is the default chunk size, change if file size changes
 for i in {0..3}
 do
     echo "Starting client $i with dataset ${datafiles[$i]}"

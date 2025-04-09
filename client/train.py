@@ -52,8 +52,9 @@ def train(in_model_path, out_model_path):
 
         if X_train is None or y_train is None:
             raise ValueError("❌ X or y is None! Likely issue inside load_data()")
+        
+        
         chunk_size = 80000  # You can experiment with this number!
-
         # Read only the first chunk
         chunk_iter = pd.read_csv(data_path, chunksize=chunk_size)
         df = next(chunk_iter)  # Get the first chunk
@@ -83,11 +84,7 @@ def train(in_model_path, out_model_path):
 
         # --- Load model ---
         print("[DEBUG] ===== Loading model parameters...")
-        if "IndianFleetData" in data_path:
-            model = load_parameters(in_model_path)
-        else:
-            # change this to the new model if you're using the US dataset
-            model = load_parameters(in_model_path)
+        model = load_parameters(in_model_path)
         
 
         # --- Training setup ---

@@ -18,10 +18,6 @@ class ServerFunctions(ServerFunctionsBase):
         self.cluster_models = {}   # Stores models for each cluster
         self.client_data = {}      # Stores latest updates from clients
         self.num_clusters = 0
-
-        # not used as they are a part of unallowed packages imports
-        #self.similarity_threshold = 0.2
-        #self.last_silhouette_score = None
         
 
     # Called at the beginning of each round to select clients
@@ -43,7 +39,8 @@ class ServerFunctions(ServerFunctionsBase):
             if isinstance(metadata[k], (int, float))
         ])
     
-    
+    # add an idea of having a parameter that says which rolling mean to use
+    # like a parameter that dictates/says "use the rolling mean of the next 14 days"
     def aggregate(self, previous_global, client_updates):
         try:
             client_ids = list(client_updates.keys())
@@ -100,25 +97,38 @@ class ServerFunctions(ServerFunctionsBase):
             print(f"[ERROR] ===== ")
             raise
 
+
+
 def client_settings(self, global_model):
     settings = {}
 
+    # If no global model is available, return safe fallback settings.
     if global_model is None:
         print("[WARNING] No global model available yet — likely no session started.")
-        # Return empty safe fallback
+        # Return safe fallback for all clients.
         return {client_id: {"learning_rate": self.lr} for client_id in self.client_clusters}
 
-
-
+    # Optional learning rate decay logic.
     if self.round % 10 == 0:
         self.lr *= 0.1
 
+    # Prepare common data orchestration parameters.
+    # For example, you can calculate a window offset: e.g., every round covers a new segment of data.
+    # Assume each round should shift the window by one day, or define a policy: e.g., "use the next 14-day segment."
+    data_orch_params = {
+        "window_offset": self.round,      # Example: current round number as a shift in days
+        "window_length": 14,              # 14 days rolling window
+        "orchestrate": True               # A flag to indicate that data orchestration is active
+    }
+
+    # At round 0, send seed parameters; otherwise, send cluster-specific models and data instructions.
     if self.round == 0:
         print("[INFO] Sending seed model to all clients.")
         for client_id in self.client_clusters:
             settings[client_id] = {
                 "in_model_path": "seed.npz",
-                "learning_rate": self.lr
+                "learning_rate": self.lr,
+                "data_orch_params": data_orch_params  # Include our orchestration parameters
             }
     else:
         print(f"[INFO] Sending cluster-specific models, round {self.round}")
@@ -126,9 +136,9 @@ def client_settings(self, global_model):
             model = self.cluster_models.get(cluster_id)
             settings[client_id] = {
                 "model": model if model is not None else global_model,
-                "learning_rate": self.lr
+                "learning_rate": self.lr,
+                "data_orch_params": data_orch_params  # Include orchestration params for each client
             }
-
     self.round += 1
     return settings
 
