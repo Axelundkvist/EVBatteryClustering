@@ -11,7 +11,7 @@ helper = get_helper(HELPER_MODULE)
 ## model class name should be BatterySoHModel
 
 class BatterySoHModel(torch.nn.Module):
-    def __init__(self, input_dim=6):  # 6 features in dataset
+    def __init__(self, input_dim=12):  # 12 features in dataset
         super(BatterySoHModel, self).__init__()
         self.fc1 = torch.nn.Linear(input_dim, 64)
         self.fc2 = torch.nn.Linear(64, 32)
@@ -23,9 +23,9 @@ class BatterySoHModel(torch.nn.Module):
         x = self.relu(self.fc2(x))
         return self.fc3(x)
 
-def compile_model():
+def compile_model(num_features=12):
     """ Create a fresh model instance with the correct input size. """
-    return BatterySoHModel(input_dim=6)  # Ensure input size matches dataset
+    return BatterySoHModel(input_dim=num_features)  # Ensure input size matches dataset
 
 
 def save_parameters(model, out_path):
@@ -40,7 +40,7 @@ def save_parameters(model, out_path):
     helper.save(parameters_np, out_path)
 
 
-def load_parameters(model_path):
+def load_parameters(model_path, num_features):
     """Load model parameters from file and populate model.
 
     param model_path: The path to load from.
@@ -48,7 +48,7 @@ def load_parameters(model_path):
     :return: The loaded model.
     :rtype: torch.nn.Module
     """
-    model = compile_model()
+    model = compile_model(num_features)
     parameters_np = helper.load(model_path)
 
     params_dict = zip(model.state_dict().keys(), parameters_np)
@@ -64,7 +64,7 @@ def init_seed(out_path="seed.npz"):
     :type out_path: str
     """
     # Init and save
-    model = compile_model()
+    model = compile_model(num_features=12)
     save_parameters(model, out_path)
 
 

@@ -46,20 +46,54 @@ class ServerFunctions(ServerFunctionsBase):
             client_ids = list(client_updates.keys())
             cluster_clients = {}
 
+            # Extract driving behavior features from metadata for clustering
             for cid in client_ids:
                 metadata = client_updates[cid][1]
-                temp = metadata.get("ambairtemp", 25) # sets default value to 25 if not getting a value
-                print(f"[DEBUG] ===== temp for client {cid}: {temp}")
-
-                # Rule-based clustering by temperature zone
+                
+                # Extract driving behavior features
+                driving_features = {
+                    "rms_current_1h": metadata.get("rms_current_1h_avg", 0),
+                    "rms_current_1d": metadata.get("rms_current_1d_avg", 0),
+                    "max_acceleration": metadata.get("max_acceleration_avg", 0),
+                    "avg_speed": metadata.get("avg_speed_avg", 0),
+                    "driving_aggressiveness": metadata.get("driving_aggressiveness_avg", 0),
+                    "battery_stress": metadata.get("battery_stress_avg", 0),
+                    "temperature": metadata.get("ambairtemp", 25)  # Keep temperature as a feature
+                }
+                
+                # Calculate a driving behavior score for clustering
+                # This combines multiple features into a single score
+                driving_score = (
+                    driving_features["rms_current_1h"] * 0.2 +
+                    driving_features["rms_current_1d"] * 0.15 +
+                    driving_features["max_acceleration"] * 0.15 +
+                    driving_features["avg_speed"] * 0.1 +
+                    driving_features["driving_aggressiveness"] * 0.2 +
+                    driving_features["battery_stress"] * 0.1 +
+                    (driving_features["temperature"] - 25) * 0.1  # Normalize temperature around 25°C
+                )
+                
+                print(f"[DEBUG] ===== Driving behavior score for client {cid}: {driving_score:.2f}")
+                
+                # Rule-based clustering by driving behavior
+                if driving_score > 0.7:
+                    behavior_zone = "aggressive"
+                elif driving_score < 0.3:
+                    behavior_zone = "conservative"
+                else:
+                    behavior_zone = "moderate"
+                
+                # Also consider temperature for more nuanced clustering
+                temp = driving_features["temperature"]
                 if temp > 35:
                     temp_zone = "hot"
                 elif temp < 15:
                     temp_zone = "cold"
                 else:
                     temp_zone = "moderate"
-
-                cluster_id = temp_zone
+                
+                # Combine behavior and temperature for final cluster
+                cluster_id = f"{behavior_zone}_{temp_zone}"
                 self.client_clusters[cid] = cluster_id
                 cluster_clients.setdefault(cluster_id, []).append(cid)
 
@@ -84,7 +118,7 @@ class ServerFunctions(ServerFunctionsBase):
             self.cluster_models = new_cluster_models
 
             # Logging cluster summary
-            print(f"✅ Created {len(new_cluster_models)} temperature-based clusters.")
+            print(f"✅ Created {len(new_cluster_models)} behavior-temperature clusters.")
             for cluster_id, clients in cluster_clients.items():
                 print(f" - Cluster '{cluster_id}' has clients: {clients}")
 
@@ -144,121 +178,4 @@ def client_settings(self, global_model):
 
 
 
-    # def client_settings(self, global_model):
-    #     settings = {}
-
-    #     if self.round % 10 == 0:
-    #         self.lr *= 0.1
-
-    #     if self.round == 0:
-    #         print("[INFO] Sending seed model to all clients.")
-    #         for client_id in self.client_clusters:
-    #             settings[client_id] = {
-    #                 "in_model_path": "seed.npz",
-    #                 "learning_rate": self.lr,
-    #             }
-    #     else:
-    #         print(f"[INFO] Sending cluster-specific models, round {self.round}")
-    #         for client_id in self.client_clusters:
-    #             cluster_id = self.client_clusters.get(client_id)
-    #             model = self.cluster_models.get(cluster_id) if self.cluster_models else None
-
-    #             if model is None:
-    #                 print(f"[WARNING] No cluster model found for client {client_id} (cluster_id={cluster_id}), sending global model instead.")
-
-    #             settings[client_id] = {
-    #                 "model": model if model is not None else global_model,
-    #                 "learning_rate": self.lr,
-    #             }
-
-    #     self.round += 1
-    #     return settings
-
-
-
-
-    '''
-    def Oldaggregate(self, previous_global, client_updates):
-        client_ids = list(client_updates.keys())
-
-        # --- Hybrid client vector: model weights + metadata ---
-        client_vectors = [
-            np.concatenate([
-                self.flatten_model(client_updates[cid][0]),
-                self.extract_metadata_features(client_updates[cid][1])
-            ])
-            for cid in client_ids
-        ]
-                
-        # --- Affinity Propagation ---
-        ap = AffinityPropagation(damping=0.75, preference=-50).fit(client_vectors)
-        labels = ap.labels_
-
-        # --- Silhouette score logging ---
-        if len(set(labels)) > 1:
-            self.last_silhouette_score = silhouette_score(client_vectors, labels)
-            logger.info(f"Silhouette Score before merging: {self.last_silhouette_score:.4f}")
-        else:
-            self.last_silhouette_score = -1
-            logger.info("Silhouette Score could not be computed (only one cluster).")
-
-        # --- Cluster merging if centroids too close ---
-        cluster_vectors = {}
-        for idx, label in enumerate(labels):
-            cluster_vectors.setdefault(label, []).append(client_vectors[idx])
-        cluster_centroids = {label: np.mean(vecs, axis=0) for label, vecs in cluster_vectors.items()}
-
-        label_map = {}
-        new_label = 0
-        used = set()
-        labels_updated = labels.copy()
-
-        for i, ci in enumerate(cluster_centroids):
-            if ci in used:
-                continue
-            label_map[ci] = new_label
-            for cj in cluster_centroids:
-                if ci != cj and cj not in used:
-                    dist = np.linalg.norm(cluster_centroids[ci] - cluster_centroids[cj])
-                    if dist < self.similarity_threshold:
-                        label_map[cj] = new_label
-                        used.add(cj)
-            used.add(ci)
-            new_label += 1
-
-        for idx, l in enumerate(labels):
-            labels_updated[idx] = label_map[l]
-
-        # --- Aggregate per-cluster models ---
-        new_cluster_models = {}
-        cluster_clients = {}
-        for idx, cid in enumerate(client_ids):
-            cluster_id = labels_updated[idx]
-            self.client_clusters[cid] = cluster_id
-            cluster_clients.setdefault(cluster_id, []).append(cid)
-
-        for cluster_id, clients in cluster_clients.items():
-            total_weight = sum(client_updates[cid][1].get("num_examples", 1) for cid in clients)
-            aggregated_model = [np.zeros_like(param) for param in previous_global]
-
-            for cid in clients:
-                weight = client_updates[cid][1].get("num_examples", 1) / total_weight
-                for i, param in enumerate(client_updates[cid][0]):
-                    aggregated_model[i] += param * weight
-
-            new_cluster_models[cluster_id] = aggregated_model
-
-        self.cluster_models = new_cluster_models
-        self.num_clusters = len(new_cluster_models)
-
-        logger.info(f"Number of clusters after merging: {self.num_clusters}")
-        for cluster_id, clients in cluster_clients.items():
-            logger.info(f"Cluster {cluster_id} has clients: {clients}")
-
-        # Return largest cluster model for fallback
-        largest_cluster = max(new_cluster_models.keys(), key=lambda x: len(cluster_clients[x]))
-        return new_cluster_models[largest_cluster]
-'''
-
-
-
+    
