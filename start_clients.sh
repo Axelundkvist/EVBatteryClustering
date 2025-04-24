@@ -14,26 +14,6 @@ datafiles=(
 "/Users/Axel/Documents/Master/MasterThesis/DataSets/IndianFleetData/BatteryFleetData/device_57622858.csv"
 )
 
-# /Users/Axel/Documents/Master/MasterThesis/DataSets/FieldVehicleData/DataLoadAndConcatination/vehicle1_1min.csv
-# /Users/Axel/Documents/Master/MasterThesis/DataSets/FieldVehicleData/DataLoadAndConcatination/vehicle1_5min.csv
-# /Users/Axel/Documents/Master/MasterThesis/DataSets/FieldVehicleData/DataLoadAndConcatination/vehicle2_1min.csv
-# /Users/Axel/Documents/Master/MasterThesis/DataSets/FieldVehicleData/DataLoadAndConcatination/vehicle2_5min.csv
-# /Users/Axel/Documents/Master/MasterThesis/DataSets/FieldVehicleData/DataLoadAndConcatination/vehicle3_1min.csv
-# /Users/Axel/Documents/Master/MasterThesis/DataSets/FieldVehicleData/DataLoadAndConcatination/vehicle3_5min.csv
-# /Users/Axel/Documents/Master/MasterThesis/DataSets/FieldVehicleData/DataLoadAndConcatination/vehicle4_1min.csv
-# /Users/Axel/Documents/Master/MasterThesis/DataSets/FieldVehicleData/DataLoadAndConcatination/vehicle4_5min.csv
-# /Users/Axel/Documents/Master/MasterThesis/DataSets/FieldVehicleData/DataLoadAndConcatination/vehicle5_1min.csv
-# /Users/Axel/Documents/Master/MasterThesis/DataSets/FieldVehicleData/DataLoadAndConcatination/vehicle5_5min.csv
-# /Users/Axel/Documents/Master/MasterThesis/DataSets/FieldVehicleData/DataLoadAndConcatination/vehicle6_1min.csv
-# /Users/Axel/Documents/Master/MasterThesis/DataSets/FieldVehicleData/DataLoadAndConcatination/vehicle6_5min.csv
-# /Users/Axel/Documents/Master/MasterThesis/DataSets/FieldVehicleData/DataLoadAndConcatination/vehicle7_1min.csv
-# /Users/Axel/Documents/Master/MasterThesis/DataSets/FieldVehicleData/DataLoadAndConcatination/vehicle7_5min.csv
-# /Users/Axel/Documents/Master/MasterThesis/DataSets/FieldVehicleData/DataLoadAndConcatination/vehicle8_1min.csv
-# /Users/Axel/Documents/Master/MasterThesis/DataSets/FieldVehicleData/DataLoadAndConcatination/vehicle8_5min.csv
-# /Users/Axel/Documents/Master/MasterThesis/DataSets/FieldVehicleData/DataLoadAndConcatination/vehicle9_1min.csv
-# /Users/Axel/Documents/Master/MasterThesis/DataSets/FieldVehicleData/DataLoadAndConcatination/vehicle9_5min.csv
-
-
 
 new1MinAggdatafiles=(
 "/Users/Axel/Documents/Master/MasterThesis/DataSets/FieldVehicleData/DataLoadAndConcatination/vehicle1_1min.csv"
@@ -58,80 +38,59 @@ new5MinAggdatafiles=(
 "/Users/Axel/Documents/Master/MasterThesis/DataSets/FieldVehicleData/DataLoadAndConcatination/vehicle8_5min.csv"
 "/Users/Axel/Documents/Master/MasterThesis/DataSets/FieldVehicleData/DataLoadAndConcatination/vehicle9_5min.csv"
 )
-# tokens för norhterly projektet
 
-# tokens=(
-# "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQ2MDA1ODY4LCJpYXQiOjE3NDM0MTM4NjgsImp0aSI6ImNhYzEyOWEwM2Q5OTRhMzdhYWQyOWFiODk2ZWM3NTQ0IiwidXNlcl9pZCI6MTIxMywiY3JlYXRvciI6ImF4ZWxwMDBAaG90bWFpbC5jb20iLCJyb2xlIjoiY2xpZW50IiwicHJvamVjdF9zbHVnIjoiYXhlbG5vcnRoZXJseS1rZ2kifQ.-r7EMIZMe7P2Bnn__N27BrVQDJecXN6hrgatv5ukmTI"
-# "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQ2MDEwODE3LCJpYXQiOjE3NDM0MTg4MTcsImp0aSI6ImE2ZTViYzdiZWMzMTRiZTc4OTlhMWU5MDY3MzJiYjBjIiwidXNlcl9pZCI6MTIxMywiY3JlYXRvciI6ImF4ZWxwMDBAaG90bWFpbC5jb20iLCJyb2xlIjoiY2xpZW50IiwicHJvamVjdF9zbHVnIjoiYXhlbG5vcnRoZXJseS1rZ2kifQ.HyFXC1N-VaWz7OiaxD95fdtJ0qVbkYmE09MPuy8h9xU"
-# "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQ2MDEwODE3LCJpYXQiOjE3NDM0MTg4MTcsImp0aSI6ImE2ZTViYzdiZWMzMTRiZTc4OTlhMWU5MDY3MzJiYjBjIiwidXNlcl9pZCI6MTIxMywiY3JlYXRvciI6ImF4ZWxwMDBAaG90bWFpbC5jb20iLCJyb2xlIjoiY2xpZW50IiwicHJvamVjdF9zbHVnIjoiYXhlbG5vcnRoZXJseS1rZ2kifQ.HyFXC1N-VaWz7OiaxD95fdtJ0qVbkYmE09MPuy8h9xU"
-# "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQ2MDEwODQ4LCJpYXQiOjE3NDM0MTg4NDgsImp0aSI6ImY3NzQ3NTY1ZDQyMjQ2Y2E5OWYyM2IxNDE2NWUyOWE2IiwidXNlcl9pZCI6MTIxMywiY3JlYXRvciI6ImF4ZWxwMDBAaG90bWFpbC5jb20iLCJyb2xlIjoiY2xpZW50IiwicHJvamVjdF9zbHVnIjoiYXhlbG5vcnRoZXJseS1rZ2kifQ.Bqqf0f_4aborAOc5AhT95UPwexAjQJGLabNuXabqIzM"
-# "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQ2MDEwODQ4LCJpYXQiOjE3NDM0MTg4NDgsImp0aSI6ImY3NzQ3NTY1ZDQyMjQ2Y2E5OWYyM2IxNDE2NWUyOWE2IiwidXNlcl9pZCI6MTIxMywiY3JlYXRvciI6ImF4ZWxwMDBAaG90bWFpbC5jb20iLCJyb2xlIjoiY2xpZW50IiwicHJvamVjdF9zbHVnIjoiYXhlbG5vcnRoZXJseS1rZ2kifQ.Bqqf0f_4aborAOc5AhT95UPwexAjQJGLabNuXabqIzM"
-# "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQ2MDEwODcyLCJpYXQiOjE3NDM0MTg4NzIsImp0aSI6IjA2OGU2YmE4YmRhMjQ2N2ZiNGFlYmVkZTcxNWM1MWIzIiwidXNlcl9pZCI6MTIxMywiY3JlYXRvciI6ImF4ZWxwMDBAaG90bWFpbC5jb20iLCJyb2xlIjoiY2xpZW50IiwicHJvamVjdF9zbHVnIjoiYXhlbG5vcnRoZXJseS1rZ2kifQ.iuLpLw3qpHpkfFopTb1mdIK53J8Mn92WnzSkf_jsBOU"
-# "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQ2MDEwODc3LCJpYXQiOjE3NDM0MTg4NzcsImp0aSI6ImFmMTI4YWY1N2I3MzRmYTU4MjM2MTdjY2M4YzU5ZmJlIiwidXNlcl9pZCI6MTIxMywiY3JlYXRvciI6ImF4ZWxwMDBAaG90bWFpbC5jb20iLCJyb2xlIjoiY2xpZW50IiwicHJvamVjdF9zbHVnIjoiYXhlbG5vcnRoZXJseS1rZ2kifQ.qmx9_IG8CsuA72QLyYpANDr_nolRtnjASuuUVSIVWsA"
-# "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQ2MDEwODgwLCJpYXQiOjE3NDM0MTg4ODAsImp0aSI6IjI0YmQxNGQxMGNkOTQ3YTY4YTZkMDJiNGEwMzJkZTYyIiwidXNlcl9pZCI6MTIxMywiY3JlYXRvciI6ImF4ZWxwMDBAaG90bWFpbC5jb20iLCJyb2xlIjoiY2xpZW50IiwicHJvamVjdF9zbHVnIjoiYXhlbG5vcnRoZXJseS1rZ2kifQ.fmRhWmvOHEO2P3VcX7l4cwgUoVpYzsqRuqlIouLwneE"
-# "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQ2MDEwODg0LCJpYXQiOjE3NDM0MTg4ODQsImp0aSI6IjAxMjhlMGI4NThhODRlMTBiMWM5ZjYwYjJmZDU3NGVkIiwidXNlcl9pZCI6MTIxMywiY3JlYXRvciI6ImF4ZWxwMDBAaG90bWFpbC5jb20iLCJyb2xlIjoiY2xpZW50IiwicHJvamVjdF9zbHVnIjoiYXhlbG5vcnRoZXJseS1rZ2kifQ.LbMLWjVaAI72M2z9b9AF_w_rWy7AIu5YMVxDqMiKv-Y"
-# "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQ2MDEwODkyLCJpYXQiOjE3NDM0MTg4OTIsImp0aSI6IjY3YWE4MTgxOWUyNzQ1NjViN2U2YjEzMTNkN2RhY2E0IiwidXNlcl9pZCI6MTIxMywiY3JlYXRvciI6ImF4ZWxwMDBAaG90bWFpbC5jb20iLCJyb2xlIjoiY2xpZW50IiwicHJvamVjdF9zbHVnIjoiYXhlbG5vcnRoZXJseS1rZ2kifQ.EGPerp6QlojIpC7IYJzehhEMI2ZezeLWjHnrk1k73g4"
-# )
-# for i in {0..3}
-# do
-#     echo "Starting client $i with dataset ${datafiles[$i]}"
-#     export FEDN_DATA_PATH=${datafiles[$i]}
-#     fedn client start \
-#         --api-url api.fedn.scaleoutsystems.com/axelnortherly-kgi-fedn-reducer \
-#         --token ${tokens[$i]} &
-#     sleep 2
-# done
-
-# echo "All clients started!"
-
-
-
-
-#export FEDN_PACKAGE_EXTRACT_DIR=client/package
-#export FEDN_PACKAGE=./client/package.tgz
-#export FEDN_PACKAGE_EXTRACT_DIR=/bin/bash
-'''
-for i in {0..3}
-do
-    echo "Starting client $i with dataset ${datafiles[$i]}"
-    export FEDN_DATA_PATH=${datafiles[$i]}
-    fedn client start \
-        --api-url api.fedn.scaleoutsystems.com/axelnortherly-kgi-fedn-reducer \
-        --token ${tokens[$i]} &
-    sleep 2
-done
-
-echo "All clients started!"
-'''
-#api.fedn.scaleoutsystems.com/evbatteryclusteringprojectnewattempt-zhk-fedn-reducer
-
-
-# tokens för clustering projektet (ditt trejde 3 April projekt) gammalt.....
-# tokens för clustering projektet (ditt trejde 11 April projekt)
-tokens=(
-"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQ2OTUzMjMwLCJpYXQiOjE3NDQzNjEyMzAsImp0aSI6IjI3NDQ4YTlhNzVmMTQ4ZjdiMjQ3ZmFjNjBiOTQxMzg4IiwidXNlcl9pZCI6MTIxMywiY3JlYXRvciI6ImF4ZWxwMDBAaG90bWFpbC5jb20iLCJyb2xlIjoiY2xpZW50IiwicHJvamVjdF9zbHVnIjoic2Vzc2lvbnRlc3Rpbmcta2NuIn0.uCgc82elN46uYf4ucpon6h4q7SHOrmNC6-h2pKL16Vo"
-"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQ2OTUzMjUzLCJpYXQiOjE3NDQzNjEyNTMsImp0aSI6IjNjNjYxM2VjZjMxMTQyMDI4YjM0MmM2ZDg4MmMxOTVjIiwidXNlcl9pZCI6MTIxMywiY3JlYXRvciI6ImF4ZWxwMDBAaG90bWFpbC5jb20iLCJyb2xlIjoiY2xpZW50IiwicHJvamVjdF9zbHVnIjoic2Vzc2lvbnRlc3Rpbmcta2NuIn0.VLoVLEL4w-SdYP6IOuYj6hFJ-yZTBi8NI-x54SgF_4w"
-"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQ2OTUzMjc0LCJpYXQiOjE3NDQzNjEyNzQsImp0aSI6IjE4NDlkZDY0OWNlZTQzZGU4NDc4ODg5MmNiN2FhNmY5IiwidXNlcl9pZCI6MTIxMywiY3JlYXRvciI6ImF4ZWxwMDBAaG90bWFpbC5jb20iLCJyb2xlIjoiY2xpZW50IiwicHJvamVjdF9zbHVnIjoic2Vzc2lvbnRlc3Rpbmcta2NuIn0.LbfRr7v6CHk_BtG5G2DJaKLGokjE8JJGhrAh2d25fso"
-"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQ2OTUzMjkyLCJpYXQiOjE3NDQzNjEyOTIsImp0aSI6ImJkZGE4NDIwNGVmZDQzNzdiYTgzNWEwY2IzYzAwYjYzIiwidXNlcl9pZCI6MTIxMywiY3JlYXRvciI6ImF4ZWxwMDBAaG90bWFpbC5jb20iLCJyb2xlIjoiY2xpZW50IiwicHJvamVjdF9zbHVnIjoic2Vzc2lvbnRlc3Rpbmcta2NuIn0.n-dNENhfHmgARYzcsayhbEdxJn3jG2XPtWzLtcOtlbA"
-"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQ2OTUzMzAzLCJpYXQiOjE3NDQzNjEzMDMsImp0aSI6IjNiMzQwYjdkZTQxZjQ5ZmE5NDBmNzNkNzk1MWI2NDBlIiwidXNlcl9pZCI6MTIxMywiY3JlYXRvciI6ImF4ZWxwMDBAaG90bWFpbC5jb20iLCJyb2xlIjoiY2xpZW50IiwicHJvamVjdF9zbHVnIjoic2Vzc2lvbnRlc3Rpbmcta2NuIn0.56EY2R0FvpnQw1iyyF4kDbU0kOkSwxn_ZAiraGwB86I"
-"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQ2OTUzMzE1LCJpYXQiOjE3NDQzNjEzMTUsImp0aSI6IjcxOGIyYWMwN2M2NDRlYTk5Nzc4ZTNlNjFkZDg1NmFiIiwidXNlcl9pZCI6MTIxMywiY3JlYXRvciI6ImF4ZWxwMDBAaG90bWFpbC5jb20iLCJyb2xlIjoiY2xpZW50IiwicHJvamVjdF9zbHVnIjoic2Vzc2lvbnRlc3Rpbmcta2NuIn0.oUeuXzj10gRsFL_60pFg2LrXmhtJj5pJqXxJocKEz94"
-"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQ2OTUzMzI2LCJpYXQiOjE3NDQzNjEzMjYsImp0aSI6IjI2ZWUxYzA5NjkyMTQxOWE4MDExYjU4NTkwNzA5ZjFhIiwidXNlcl9pZCI6MTIxMywiY3JlYXRvciI6ImF4ZWxwMDBAaG90bWFpbC5jb20iLCJyb2xlIjoiY2xpZW50IiwicHJvamVjdF9zbHVnIjoic2Vzc2lvbnRlc3Rpbmcta2NuIn0.5T58eMR08NmPSEykprzE5GoaRuf-hQbkfnm4D_iFQjo"
-"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQ2OTUzMzM2LCJpYXQiOjE3NDQzNjEzMzYsImp0aSI6IjY1MTU1NDdlYTVjNzQwYjE4OTU2YmU1MGZhOGJkYWNiIiwidXNlcl9pZCI6MTIxMywiY3JlYXRvciI6ImF4ZWxwMDBAaG90bWFpbC5jb20iLCJyb2xlIjoiY2xpZW50IiwicHJvamVjdF9zbHVnIjoic2Vzc2lvbnRlc3Rpbmcta2NuIn0.8_T06RF4txfFvKT-WUkGCA2zNTeiSEzf2pPmqHEnTZU"
-"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQ2OTUzMzQ2LCJpYXQiOjE3NDQzNjEzNDYsImp0aSI6IjhiYjYyOGNkNmEzNTQzOWZhNzhhOGVjYjI4ZjRkNjA2IiwidXNlcl9pZCI6MTIxMywiY3JlYXRvciI6ImF4ZWxwMDBAaG90bWFpbC5jb20iLCJyb2xlIjoiY2xpZW50IiwicHJvamVjdF9zbHVnIjoic2Vzc2lvbnRlc3Rpbmcta2NuIn0.QyL1QkYEBjmD_bsKBL8O7Dq9FanC6AHJeKO2NuHoo5o"
-"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQ2OTUzMzcyLCJpYXQiOjE3NDQzNjEzNzIsImp0aSI6ImE1MWIyZWE2ZDhmYjRmMDI5ZWYwZWZlNDMzMDJhNWJhIiwidXNlcl9pZCI6MTIxMywiY3JlYXRvciI6ImF4ZWxwMDBAaG90bWFpbC5jb20iLCJyb2xlIjoiY2xpZW50IiwicHJvamVjdF9zbHVnIjoic2Vzc2lvbnRlc3Rpbmcta2NuIn0._NHtPbzWj0UkFSh3oXhz95C_lG7nI4Ee7_TZ1hnSMVM"
+fieldVehicleDatafiles_folders=(
+"/Users/Axel/Documents/Master/MasterThesis/DataSets/FieldVehicleData/Christian_validation_data/vehicle1"
+"/Users/Axel/Documents/Master/MasterThesis/DataSets/FieldVehicleData/Christian_validation_data/vehicle2"
+"/Users/Axel/Documents/Master/MasterThesis/DataSets/FieldVehicleData/Christian_validation_data/vehicle3"
+"/Users/Axel/Documents/Master/MasterThesis/DataSets/FieldVehicleData/Christian_validation_data/vehicle4"
+"/Users/Axel/Documents/Master/MasterThesis/DataSets/FieldVehicleData/Christian_validation_data/vehicle5"
+"/Users/Axel/Documents/Master/MasterThesis/DataSets/FieldVehicleData/Christian_validation_data/vehicle6"
+"/Users/Axel/Documents/Master/MasterThesis/DataSets/FieldVehicleData/Christian_validation_data/vehicle7"
+"/Users/Axel/Documents/Master/MasterThesis/DataSets/FieldVehicleData/Christian_validation_data/vehicle8"
+"/Users/Axel/Documents/Master/MasterThesis/DataSets/FieldVehicleData/Christian_validation_data/vehicle9"
 )
 
+
+michgan_folder=(
+    "/Users/Axel/Documents/Master/MasterThesis/DataSets/Michigan/axel/cell_1.csv"
+    "/Users/Axel/Documents/Master/MasterThesis/DataSets/Michigan/axel/cell_2.csv"
+    "/Users/Axel/Documents/Master/MasterThesis/DataSets/Michigan/axel/cell_3.csv"
+    "/Users/Axel/Documents/Master/MasterThesis/DataSets/Michigan/axel/cell_4.csv"
+    "/Users/Axel/Documents/Master/MasterThesis/DataSets/Michigan/axel/cell_5.csv"
+    "/Users/Axel/Documents/Master/MasterThesis/DataSets/Michigan/axel/cell_6.csv"
+    "/Users/Axel/Documents/Master/MasterThesis/DataSets/Michigan/axel/cell_7.csv"
+    "/Users/Axel/Documents/Master/MasterThesis/DataSets/Michigan/axel/cell_8.csv"
+    "/Users/Axel/Documents/Master/MasterThesis/DataSets/Michigan/axel/cell_9.csv"
+    "/Users/Axel/Documents/Master/MasterThesis/DataSets/Michigan/axel/cell_10.csv"
+    "/Users/Axel/Documents/Master/MasterThesis/DataSets/Michigan/axel/cell_11.csv"
+    "/Users/Axel/Documents/Master/MasterThesis/DataSets/Michigan/axel/cell_12.csv"
+)
+
+
+tokens=(
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQ3NDgzMDcxLCJpYXQiOjE3NDQ4OTEwNzEsImp0aSI6ImE3NjE2MjM5ZjQ5YjRlNmNiZmQxMzI4NjYxOGYxYjg3IiwidXNlcl9pZCI6MTIxMywiY3JlYXRvciI6ImF4ZWxwMDBAaG90bWFpbC5jb20iLCJyb2xlIjoiY2xpZW50IiwicHJvamVjdF9zbHVnIjoiYXhlbC14dGIifQ.5v4muxzjIothujbUb2LC5PTha3yWMUj7haVNFEgicVs"
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQ3NDgzMTQ1LCJpYXQiOjE3NDQ4OTExNDUsImp0aSI6ImYxY2NjOTU1YjEyMDRmNjA5OTk2NjNkMWFmZTk5MTNlIiwidXNlcl9pZCI6MTIxMywiY3JlYXRvciI6ImF4ZWxwMDBAaG90bWFpbC5jb20iLCJyb2xlIjoiY2xpZW50IiwicHJvamVjdF9zbHVnIjoiYXhlbC14dGIifQ.yybXaiMLQBXJY7gnzmK2AHa6me_qIzNIEsD16R3ujfs"
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQ3NDgzMTU2LCJpYXQiOjE3NDQ4OTExNTYsImp0aSI6IjkwNzZmNDhkZWUzOTRjM2NiYWVkODhhN2I1NzYwN2ZhIiwidXNlcl9pZCI6MTIxMywiY3JlYXRvciI6ImF4ZWxwMDBAaG90bWFpbC5jb20iLCJyb2xlIjoiY2xpZW50IiwicHJvamVjdF9zbHVnIjoiYXhlbC14dGIifQ.farI4lM6zcxBRTY5vey7H43IhsxvJp2RBeWXCxqhxIc"
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQ3NDgzMTc2LCJpYXQiOjE3NDQ4OTExNzYsImp0aSI6IjU1NGVhMDBiMmJjYTQxZGZhMWY3MDZmNTBlNWM0MzhjIiwidXNlcl9pZCI6MTIxMywiY3JlYXRvciI6ImF4ZWxwMDBAaG90bWFpbC5jb20iLCJyb2xlIjoiY2xpZW50IiwicHJvamVjdF9zbHVnIjoiYXhlbC14dGIifQ.mALUsOVJnVwmdG2lYpwM5AT0oxkoj3Erknf6A64nXE0"
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQ3NDgzMTg1LCJpYXQiOjE3NDQ4OTExODUsImp0aSI6Ijc1NzkzZmNmNzViMzRlYTE5NTc5ZmMwYWQ0MjdjN2E2IiwidXNlcl9pZCI6MTIxMywiY3JlYXRvciI6ImF4ZWxwMDBAaG90bWFpbC5jb20iLCJyb2xlIjoiY2xpZW50IiwicHJvamVjdF9zbHVnIjoiYXhlbC14dGIifQ.-AZgjkwVVh6xC-VPIG0gKx8a3leOPOP0bXpAuOVhB3k"
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQ3NDgzMjE3LCJpYXQiOjE3NDQ4OTEyMTcsImp0aSI6IjU1ZTkzNjJlODcwMjQ1YTU4OTAzMzY3YjY5ZjdiMmVjIiwidXNlcl9pZCI6MTIxMywiY3JlYXRvciI6ImF4ZWxwMDBAaG90bWFpbC5jb20iLCJyb2xlIjoiY2xpZW50IiwicHJvamVjdF9zbHVnIjoiYXhlbC14dGIifQ.MiNPBFMl7LdMpXEfmRtUjeLWtkitbewKDTt7Y96OEJg"
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQ3NDgzMjI5LCJpYXQiOjE3NDQ4OTEyMjksImp0aSI6Ijk1Y2MyOTczZmIyMzRiOWFhMjk4MjNhMjUxOTc0OThmIiwidXNlcl9pZCI6MTIxMywiY3JlYXRvciI6ImF4ZWxwMDBAaG90bWFpbC5jb20iLCJyb2xlIjoiY2xpZW50IiwicHJvamVjdF9zbHVnIjoiYXhlbC14dGIifQ.ZstJ2oPfou_i84otNaC72Hu9sB1c1GlgiUYrPU8B_k0"
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQ3NDgzMjM2LCJpYXQiOjE3NDQ4OTEyMzYsImp0aSI6IjlhYWYwYzMzOTljMzRmZmFiYmQ2ZTNjOTZhMzE0MzFhIiwidXNlcl9pZCI6MTIxMywiY3JlYXRvciI6ImF4ZWxwMDBAaG90bWFpbC5jb20iLCJyb2xlIjoiY2xpZW50IiwicHJvamVjdF9zbHVnIjoiYXhlbC14dGIifQ.SH6_Wp_RihwGpbHK0vZeXSpe9OT6dbA7DmuVcQacwII"
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQ3NDgzMjQ3LCJpYXQiOjE3NDQ4OTEyNDcsImp0aSI6Ijg1NmJmYWU4OTY4NzQyY2E5ZDUyNmMxZmI1YjY5NmU3IiwidXNlcl9pZCI6MTIxMywiY3JlYXRvciI6ImF4ZWxwMDBAaG90bWFpbC5jb20iLCJyb2xlIjoiY2xpZW50IiwicHJvamVjdF9zbHVnIjoiYXhlbC14dGIifQ.4i-Ozii41m0pIxa8VAvO1LXwmTlNBdZanDZamjvbiDQ"
+)
+
+
 client_id=(
-"62770d69-41de-4603-bb2e-022445e46d49"
-"154b52d3-1629-4c1c-9202-4f558e7f2968"
-"29e2a5df-a787-4494-ade1-ab04dda73dc5"
-"1f842604-d0e4-4422-be86-30b69ea5f082"
-"1d243d1d-5499-471e-9709-d46cd81aaf23"
-"bc8fbf15-797c-43f0-8553-90b74cdda0b5"
-"b60b8050-5dd1-4fd4-a811-17dc639705b8"
-"50ed4ae3-c180-4038-9a2a-8e950403c2e9"
-"client 9"
-"client 10"
+"client-Asterix-1"
+"client-Obelix-2"
+"client-Idifix-3"  
+"client-Miraculix-4"
+"Jimmy-Neutron-5"
+"Spongebob-6"
+"Patrick-7"
+"Trump-8"
+"Joe-Biden-9"
 )
 
 #eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQ2MjU5Mzg3LCJpYXQiOjE3NDM2NjczODcsImp0aSI6ImZmNzkwY2Y2NGExMTRlNjVhMjI0N2IxZTdhNTkzNDBhIiwidXNlcl9pZCI6MTIxMywiY3JlYXRvciI6ImF4ZWxwMDBAaG90bWFpbC5jb20iLCJyb2xlIjoiY2xpZW50IiwicHJvamVjdF9zbHVnIjoic2VydmVyZnVuY3Rpb25tb2RpZmNhdGlvbi1udHAifQ.yW121LJH4IGn70w2ED5qtYCx4m5fp_ioQkyOz0dgJ98 --client-id 8ba3ae09-60b0-46a2-9a87-507a4d83948d
@@ -139,17 +98,15 @@ client_id=(
 
 
 #export FEDN_PACKAGE_EXTRACT_DIR=client/package
-#export FEDN_PACKAGE_EXTRACT_DIR=package
+#export FEDN_PACKAGE_EXTRACT_DIR=package 
 #export CHUNK_SIZE=80000 # this is the default chunk size, change if file size changes
-for i in {0..3}
+for i in {0..8}
 do
-    echo "Starting client $i with dataset ${new5MinAggdatafiles[$i]}"
+    echo "Starting client $i with dataset ${michgan_folder[$i]}"
     
-    export FEDN_DATA_PATH=${datafiles[$i]}
-    DATA_PATH=${datafiles[$i]} fedn client start --api-url api.fedn.scaleoutsystems.com/sessiontesting-kcn-fedn-reducer --token ${tokens[$i]} --client-id ${client_id[$i]} &
+    export FEDN_DATA_PATH=${michgan_folder[$i]}
+    #fedn client start --api-url http://localhost:8092 --local-package --client-id ${client_id[$i]}
+    fedn client start --api-url api.fedn.scaleoutsystems.com/axel-xtb-fedn-reducer --token ${tokens[$i]} --client-id ${client_id[$i]} &
     sleep 1
 done
 echo "All clients started!"
-
-
-

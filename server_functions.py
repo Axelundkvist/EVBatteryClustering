@@ -1,6 +1,7 @@
 import logging
 from fedn.network.combiner.hooks.serverfunctionsbase import ServerFunctionsBase
 from fedn.network.combiner.hooks.allowed_import import Dict, List, ServerFunctionsBase, Tuple, np, random
+from fedn.common.log_config import logger
 
 
 ## dessa kan du inte ta med
@@ -18,6 +19,8 @@ class ServerFunctions(ServerFunctionsBase):
         self.cluster_models = {}   # Stores models for each cluster
         self.client_data = {}      # Stores latest updates from clients
         self.num_clusters = 0
+        self.client_cluster_history = {}  # Dictionary to track client cluster history across rounds
+        self.current_round = 0  # Track the current round number
         
 
     # Called at the beginning of each round to select clients
@@ -39,88 +42,146 @@ class ServerFunctions(ServerFunctionsBase):
             if isinstance(metadata[k], (int, float))
         ])
     
+    #this is also creating new clusters for each round isn't it?
+    
     # add an idea of having a parameter that says which rolling mean to use
     # like a parameter that dictates/says "use the rolling mean of the next 14 days"
     def aggregate(self, previous_global, client_updates):
         try:
+            logger.info("--------------------------------")
+            logger.info("[Success] ===== starting aggregate in ServerFunctions.py")
+            logger.info("--------------------------------")
             client_ids = list(client_updates.keys())
             cluster_clients = {}
+            
+            # Increment round counter
+            self.current_round += 1
+            print(f"[DEBUG] ===== Starting round {self.current_round} =====")
 
             # Extract driving behavior features from metadata for clustering
             for cid in client_ids:
-                metadata = client_updates[cid][1]
+                try:
+                    metadata = client_updates[cid][1]
+                    
+                    # Extract driving behavior features
+                    driving_features = {
+                        "rms_current_1h": metadata.get("rms_current_1h_avg", 0),
+                        "rms_current_1d": metadata.get("rms_current_1d_avg", 0),
+                        "max_acceleration": metadata.get("max_acceleration_avg", 0),
+                        "avg_speed": metadata.get("avg_speed_avg", 0),
+                        "driving_aggressiveness": metadata.get("driving_aggressiveness_avg", 0),
+                        "battery_stress": metadata.get("battery_stress_avg", 0),
+                        "temperature": metadata.get("ambairtemp", 25)  # Keep temperature as a feature
+                    }
+                    
+                    # Calculate a driving behavior score for clustering
+                    # This combines multiple features into a single score
+                    driving_score = (
+                        driving_features["rms_current_1h"] * 0.2 +
+                        driving_features["rms_current_1d"] * 0.15 +
+                        driving_features["max_acceleration"] * 0.15 +
+                        driving_features["avg_speed"] * 0.1 +
+                        driving_features["driving_aggressiveness"] * 0.2 +
+                        driving_features["battery_stress"] * 0.1 +
+                        (driving_features["temperature"] - 25) * 0.1  # Normalize temperature around 25°C
+                    )
+                    
+                    print(f"[DEBUG] ===== Driving behavior score for client {cid}: {driving_score:.2f}")
+                    
+                    # Rule-based clustering by driving behavior
+                    if driving_score > 0.7:
+                        behavior_zone = "aggressive"
+                    elif driving_score < 0.3:
+                        behavior_zone = "conservative"
+                    else:
+                        behavior_zone = "moderate"
+                    
+                    # Also consider temperature for more nuanced clustering
+                    temp = driving_features["temperature"]
+                    if temp > 35:
+                        temp_zone = "hot"
+                    elif temp < 15:
+                        temp_zone = "cold"
+                    else:
+                        temp_zone = "moderate"
                 
-                # Extract driving behavior features
-                driving_features = {
-                    "rms_current_1h": metadata.get("rms_current_1h_avg", 0),
-                    "rms_current_1d": metadata.get("rms_current_1d_avg", 0),
-                    "max_acceleration": metadata.get("max_acceleration_avg", 0),
-                    "avg_speed": metadata.get("avg_speed_avg", 0),
-                    "driving_aggressiveness": metadata.get("driving_aggressiveness_avg", 0),
-                    "battery_stress": metadata.get("battery_stress_avg", 0),
-                    "temperature": metadata.get("ambairtemp", 25)  # Keep temperature as a feature
-                }
-                
-                # Calculate a driving behavior score for clustering
-                # This combines multiple features into a single score
-                driving_score = (
-                    driving_features["rms_current_1h"] * 0.2 +
-                    driving_features["rms_current_1d"] * 0.15 +
-                    driving_features["max_acceleration"] * 0.15 +
-                    driving_features["avg_speed"] * 0.1 +
-                    driving_features["driving_aggressiveness"] * 0.2 +
-                    driving_features["battery_stress"] * 0.1 +
-                    (driving_features["temperature"] - 25) * 0.1  # Normalize temperature around 25°C
-                )
-                
-                print(f"[DEBUG] ===== Driving behavior score for client {cid}: {driving_score:.2f}")
-                
-                # Rule-based clustering by driving behavior
-                if driving_score > 0.7:
-                    behavior_zone = "aggressive"
-                elif driving_score < 0.3:
-                    behavior_zone = "conservative"
-                else:
-                    behavior_zone = "moderate"
-                
-                # Also consider temperature for more nuanced clustering
-                temp = driving_features["temperature"]
-                if temp > 35:
-                    temp_zone = "hot"
-                elif temp < 15:
-                    temp_zone = "cold"
-                else:
-                    temp_zone = "moderate"
-                
-                # Combine behavior and temperature for final cluster
-                cluster_id = f"{behavior_zone}_{temp_zone}"
-                self.client_clusters[cid] = cluster_id
-                cluster_clients.setdefault(cluster_id, []).append(cid)
+                    # Combine behavior and temperature for final cluster
+                    cluster_id = f"{behavior_zone}_{temp_zone}"
+                    print(f"[DEBUG] ===== Client {cid} assigned to Cluster ID: {cluster_id}")
+                    
+                    # Update current cluster assignment
+                    self.client_clusters[cid] = cluster_id
+                    
+                    # Update cluster history
+                    if cid not in self.client_cluster_history:
+                        self.client_cluster_history[cid] = {}
+                    self.client_cluster_history[cid][self.current_round] = cluster_id
+                    
+                    # Add to cluster clients list
+                    cluster_clients.setdefault(cluster_id, []).append(cid)
+                    
+                except Exception as e:
+                    print(f"[ERROR] ===== Failed to extract driving behavior features for client {cid}: {e}")
+                    continue
 
-            # --- Cluster-wise FedAvg ---
+            # --- Cluster-wise FedAvg with model persistence ---
+            # Define a decay factor for historical models (how much to weight previous models)
+            # This can be adjusted based on how much you want to preserve historical learning
+            historical_weight = 0.3  # 30% weight to historical models, 70% to new updates
+            
+            # Initialize new cluster models dictionary
             new_cluster_models = {}
+            
+            # Process each cluster
             for cluster_id, clients in cluster_clients.items():
                 try:
+                    # Calculate total weight for this cluster's clients
                     total_weight = sum(client_updates[cid][1].get("num_examples", 1) for cid in clients)
+                    
+                    # Initialize aggregated model for this round
                     aggregated_model = [np.zeros_like(param) for param in previous_global]
-
+                    
+                    # Aggregate client updates for this cluster
                     for cid in clients:
                         weight = client_updates[cid][1].get("num_examples", 1) / total_weight
                         for i, param in enumerate(client_updates[cid][0]):
                             aggregated_model[i] += param * weight
-
-                    new_cluster_models[cluster_id] = aggregated_model
-
+                    
+                    # Check if we have a historical model for this cluster
+                    if cluster_id in self.cluster_models:
+                        print(f"[DEBUG] ===== Updating existing model for cluster {cluster_id}")
+                        # Combine historical model with new aggregated model
+                        historical_model = self.cluster_models[cluster_id]
+                        combined_model = []
+                        
+                        for i, (hist_param, new_param) in enumerate(zip(historical_model, aggregated_model)):
+                            # Weighted combination of historical and new parameters
+                            combined_param = hist_param * historical_weight + new_param * (1 - historical_weight)
+                            combined_model.append(combined_param)
+                        
+                        new_cluster_models[cluster_id] = combined_model
+                    else:
+                        print(f"[DEBUG] ===== Creating new model for cluster {cluster_id}")
+                        # If no historical model exists, just use the new aggregated model
+                        new_cluster_models[cluster_id] = aggregated_model
+                        
                 except Exception as e:
-                    print(f"[ERROR] ===== Failed aggregating cluster {cluster_id}: {e}, line 83")
+                    print(f"[ERROR] ===== Failed aggregating cluster {cluster_id}: {e}")
                     raise
 
+            # Update the cluster models dictionary with the new models
             self.cluster_models = new_cluster_models
 
             # Logging cluster summary
-            print(f"✅ Created {len(new_cluster_models)} behavior-temperature clusters.")
+            print(f"✅ Created/Updated {len(new_cluster_models)} behavior-temperature clusters.")
             for cluster_id, clients in cluster_clients.items():
                 print(f" - Cluster '{cluster_id}' has clients: {clients}")
+                
+            # Log client cluster history
+            print("\n[INFO] Client Cluster History:")
+            for cid, history in self.client_cluster_history.items():
+                history_str = ", ".join([f"Round {round_num}: {cluster}" for round_num, cluster in history.items()])
+                print(f" - Client {cid}: {history_str}")
 
             # Return largest cluster model (fallback model)
             largest_cluster = max(new_cluster_models.keys(), key=lambda x: len(cluster_clients[x]))
@@ -128,10 +189,28 @@ class ServerFunctions(ServerFunctionsBase):
 
         except Exception as e:
             print(f"[ERROR] ===== Failed in aggregate(): {e}")
-            print(f"[ERROR] ===== ")
+            #print(f"[ERROR] ===== ")
             raise
 
-
+    def get_client_cluster_history(self, client_id):
+        """
+        Retrieve the cluster history for a specific client.
+        Args:
+            client_id: The ID of the client
+        Returns:
+            A dictionary mapping round numbers to cluster IDs, or None if the client has no history
+        """
+        if client_id in self.client_cluster_history:
+            return self.client_cluster_history[client_id]
+        return None
+        
+    def get_all_clients_history(self):
+        """
+        Retrieve the cluster history for all clients.
+        Returns:
+            A dictionary mapping client IDs to their cluster history
+        """
+        return self.client_cluster_history
 
 def client_settings(self, global_model):
     settings = {}
@@ -150,9 +229,11 @@ def client_settings(self, global_model):
     # For example, you can calculate a window offset: e.g., every round covers a new segment of data.
     # Assume each round should shift the window by one day, or define a policy: e.g., "use the next 14-day segment."
     data_orch_params = {
+        "current_round": self.round,
         "window_offset": self.round,      # Example: current round number as a shift in days
-        "window_length": 14,              # 14 days rolling window
-        "orchestrate": True               # A flag to indicate that data orchestration is active
+        "orchestrate": True, 
+        "number_of_cycles_to_compare": 10 # A flag to indicate that data orchestration is active
+        #"window_length": 28,              # commenting our window lenght as that is arbitrary
     }
 
     # At round 0, send seed parameters; otherwise, send cluster-specific models and data instructions.
