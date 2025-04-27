@@ -101,7 +101,6 @@ class ServerFunctions(ServerFunctionsBase):
             print(f"params = {params}")
             print(f"meta = {meta}")
             
-            
             # 1) flatten the model weights using your helper
             weight_vec = self._flatten(params)  # → shape (D,)
 

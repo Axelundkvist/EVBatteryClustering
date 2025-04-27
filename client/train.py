@@ -161,14 +161,16 @@ def train(in_model_path, out_model_path):
             
 
         # --- Save model and metadata ---
+        
         try:
             print("[DEBUG] Saving model and metadata...")
+            recent_stats_serializable = recent_stats.to_dict(orient='list')
             metadata = {
                 "num_examples": len(X_train_tensor),
                 "batch_size": BATCH_SIZE,
                 "epochs": EPOCHS,
                 "learning_rate": lr,
-                "recent_stats": recent_stats
+                "recent_stats": recent_stats_serializable
                 # Add chargeing stats to metadata
                 
             }
