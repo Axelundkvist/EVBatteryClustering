@@ -17,10 +17,16 @@ from data import load_data
 import traceback
 import time
 
+data_path = os.environ.get('FEDN_DATA_PATH')
+if data_path is None:
+    raise ValueError("FEDN_DATA_PATH environment variable not set!")
+
+
 # Configuration
 BATCH_SIZE = 8  # Reduced from 32 to be smaller than dataset size
 LEARNING_RATE = 0.001
 EPOCHS = 2
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 def train(in_model_path, out_model_path):
     
@@ -28,41 +34,30 @@ def train(in_model_path, out_model_path):
     try: 
         client_settings = load_metadata(in_model_path)
         lr = client_settings.get("learning_rate", LEARNING_RATE)
-        orch_params = client_settings.get("data_orch_params", {})
-        current_round = orch_params.get("current_round", 0)
         print(f"[DEBUG] Current round: {current_round}")
-        # Extract window parameters for data orchestration
-        window_offset = orch_params.get("window_offset", 0)
-        number_of_cycles_to_compare = orch_params.get("number_of_cycles_to_compare", 10) # this could be tested out with and compared with different numbers to find the optimal one)
-        #window_length = orch_params.get("window_length", 14)
-        print(f"[DEBUG] Using data orchestration parameters: offset={window_offset}, number_of_cycles_to_compare={number_of_cycles_to_compare}")
-
+        
     except Exception as e:
         print(f"[ERROR] No metadata found in {in_model_path}. Using default learning rate: {LEARNING_RATE}")
         lr = LEARNING_RATE
-        window_offset = 0
-        number_of_cycles_to_compare = 10
+        #window_offset = 0
+        #number_of_cycles_to_compare = 10
         #window_length = 14
-    
     
     ### Loading and preprocessing data & seting the data path
     try:
         #print(f"[DEBUG] Input model path: {in_model_path}")
         #print(f"[DEBUG] Output model path: {out_model_path}")
-        data_folder = os.environ.get('FEDN_DATA_PATH')
+        #data_folder = os.environ.get('FEDN_DATA_PATH')
         current_round = 0 
-        data_file = pickDataFile(data_folder, current_round)
+        #data_file = pickDataFile(data_folder, current_round)
+
         # --- Load and preprocess data ---
         print("[DEBUG] Loading and preprocessing data...")
         
         # Pass window parameters to load_data function
         X_train, y_train, recent_stats = load_data(
-            data_file, 
-            is_train=True, 
-            window_offset=window_offset, 
-            number_of_cycles_to_compare = number_of_cycles_to_compare
-            #window_length=window_length
-        )
+            data_path, 
+            is_train=True)
         
         print("[DEBUG] Data loaded successfully:")
         print(f"Some informaiton on the data:")
@@ -74,8 +69,25 @@ def train(in_model_path, out_model_path):
 
         # --- Convert data to PyTorch tensors ---
         #print("[DEBUG] Converting data to tensors...")
-        X_train_tensor = torch.tensor(X_train, dtype=torch.float32)
-        y_train_tensor = torch.tensor(y_train, dtype=torch.float32)
+        print(X_train.dtypes)
+        
+        # 1) Fill NaNs so every row has a valid number
+        X_train['fast_charge']        = X_train['fast_charge'].fillna(0)
+        X_train['depth_of_discharge'] = X_train['depth_of_discharge'].fillna(0)
+
+        # 2) Convert booleans → floats (True→1.0, False→0.0)
+        X_train['session_type_charge']    = X_train['session_type_charge'].astype(float)
+        X_train['session_type_discharge'] = X_train['session_type_discharge'].astype(float)
+
+        # 3) Now cast the entire DataFrame to float32
+        X_train = X_train.astype('float32')
+
+        # 4) Convert to a tensor
+        X_train_tensor = torch.from_numpy(X_train.values).to(device)
+        
+        X_train_tensor = torch.from_numpy(X_train.values).float()
+        y_train_tensor = torch.from_numpy(y_train.values).float()
+        #y_train_tensor = torch.tensor(y_train, dtype=torch.float32)
 
         num_features = X_train.shape[1]
         
@@ -83,7 +95,7 @@ def train(in_model_path, out_model_path):
         print(f"[DEBUG] Creating model with {num_features} input features")
         model = load_parameters(in_model_path, num_features)    # Get the number of features from the data shape   
         print("[DEBUG] ===== Loading model parameters =====")
-        device = "cuda" if torch.cuda.is_available() else "cpu"
+        #device = "cuda" if torch.cuda.is_available() else "cpu"
         model.to(device)    
         
         # --- Training setup ---
@@ -156,30 +168,9 @@ def train(in_model_path, out_model_path):
                 "batch_size": BATCH_SIZE,
                 "epochs": EPOCHS,
                 "learning_rate": lr,
-                "temperature_stats": {
-                    "cell_max_temp": recent_stats.get("ibmu_statspktempcellmax", 0),
-                    "cell_min_temp": recent_stats.get("ibmu_statspktempcellmin", 0),
-                    "coolant_temp": recent_stats.get("impb_coolttemp_avg", 0)
-                },
-                "battery_stats": {
-                    "battery_voltage": recent_stats.get("ibmu_statspkvbatt", 0),
-                    "battery_current": recent_stats.get("ibmu_statspkcurr_avg", 0),
-                    "state_of_health": recent_stats.get("ibmu_algopksoh_avg", 0)
-                },
-                # Add driving behavior stats to metadata
-                "driving_behavior": {
-                    "rms_current_1h": recent_stats.get("rms_current_1h_avg", 0),
-                    "rms_current_1d": recent_stats.get("rms_current_1d_avg", 0),
-                    "max_acceleration": recent_stats.get("max_acceleration_avg", 0),
-                    "avg_speed": recent_stats.get("avg_speed_avg", 0),
-                    "driving_aggressiveness": recent_stats.get("driving_aggressiveness_avg", 0),
-                    "battery_stress": recent_stats.get("battery_stress_avg", 0)
-                },
-                # Include data orchestration parameters in metadata
-                "data_orch_params": {
-                    "window_offset": window_offset,
-                    "window_length": window_length
-                }
+                "recent_stats": recent_stats
+                # Add chargeing stats to metadata
+                
             }
             save_metadata(metadata, out_model_path)
             save_parameters(model, out_model_path)
