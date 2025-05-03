@@ -86,6 +86,7 @@ class ServerFunctions(ServerFunctionsBase):
         
         client_ids = list(client_updates.keys())
         print(f"client_ids = {client_ids}")
+        recent = meta.get("recent_stats", {})
         
         # fråga till gpt: vad betyder X? 
         X = []
@@ -145,6 +146,17 @@ class ServerFunctions(ServerFunctionsBase):
         else:
             labels, centers = labels_km, centers_km
 
+        #save the mapping
+        mapping = dict(zip(client_ids, labels.tolist()))
+        ids_arr = np.array(client_ids, dtype=object)
+        lbls_arr = np.array(labels, dtype=int)
+
+        # save to a .npz file in your working directory
+        np.savez("cluster_mapping.npz",
+                client_ids=ids_arr,
+                labels=lbls_arr)
+        logger.info(f"saved cluster mapping for {len(client_ids)} clients")
+        
         # save everything
         self.cluster_labels  = labels
         self.cluster_centers = centers

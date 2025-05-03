@@ -67,6 +67,21 @@ michgan_folder=(
     "/Users/Axel/Documents/Master/MasterThesis/DataSets/Michigan/axel/cell_12.csv"
 )
 
+nasa_folder=(
+    "/Users/Axel/fedn/examples/server-functions/new_data/B0005_part1.csv"
+    "/Users/Axel/fedn/examples/server-functions/new_data/B0005_part2.csv"
+    "/Users/Axel/fedn/examples/server-functions/new_data/B0006_part1.csv"
+    "/Users/Axel/fedn/examples/server-functions/new_data/B0006_part2.csv"
+    "/Users/Axel/fedn/examples/server-functions/new_data/B0007_part1.csv"
+    "/Users/Axel/fedn/examples/server-functions/new_data/B0007_part2.csv"
+    "/Users/Axel/fedn/examples/server-functions/new_data/B0046.csv"
+    "/Users/Axel/fedn/examples/server-functions/new_data/B0047.csv"
+    "/Users/Axel/fedn/examples/server-functions/new_data/B0048.csv"
+)
+
+
+
+
 # colaborated session from Viktor
 # tokens=(
 #     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQ3NDgzMDcxLCJpYXQiOjE3NDQ4OTEwNzEsImp0aSI6ImE3NjE2MjM5ZjQ5YjRlNmNiZmQxMzI4NjYxOGYxYjg3IiwidXNlcl9pZCI6MTIxMywiY3JlYXRvciI6ImF4ZWxwMDBAaG90bWFpbC5jb20iLCJyb2xlIjoiY2xpZW50IiwicHJvamVjdF9zbHVnIjoiYXhlbC14dGIifQ.5v4muxzjIothujbUb2LC5PTha3yWMUj7haVNFEgicVs"
@@ -115,9 +130,9 @@ client_id=(
 #export CHUNK_SIZE=80000 # this is the default chunk size, change if file size changes
 for i in {0..8}
 do
-    echo "Starting client $i with dataset ${michgan_folder[$i]}"
+    echo "Starting client $i with dataset ${nasa_folder[$i]}"
     
-    export FEDN_DATA_PATH=${michgan_folder[$i]}
+    export FEDN_DATA_PATH=${nasa_folder[$i]}
     #fedn client start --api-url http://localhost:8092 --local-package --client-id ${client_id[$i]}
     #fedn client start --api-url api.fedn.scaleoutsystems.com/axel-xtb-fedn-reducer --token ${tokens[$i]} --client-id ${client_id[$i]} &
     fedn client start --api-url api.fedn.scaleoutsystems.com/sfapril-jgf-fedn-reducer --token ${tokens[$i]} --client-id ${client_id[$i]} &

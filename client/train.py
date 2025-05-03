@@ -6,6 +6,7 @@ import torch
 import torch.optim as optim
 import numpy as np
 import pandas as pd
+import json
 # don't forget to update the model class name and the file to your newModel.py
 from model import BatterySoHModel, load_parameters, save_parameters
 #from client.model import BatterySoHModel
@@ -39,9 +40,6 @@ def train(in_model_path, out_model_path):
     except Exception as e:
         print(f"[ERROR] No metadata found in {in_model_path}. Using default learning rate: {LEARNING_RATE}")
         lr = LEARNING_RATE
-        #window_offset = 0
-        #number_of_cycles_to_compare = 10
-        #window_length = 14
     
     ### Loading and preprocessing data & seting the data path
     try:
@@ -60,16 +58,22 @@ def train(in_model_path, out_model_path):
             is_train=True)
         
         print("[DEBUG] Data loaded successfully:")
-        print(f"Some informaiton on the data:")
-        print(f" - X shape: {X_train.shape}")
-        print(f" - X.shape[0]: {X_train.shape[0]}")
-        print(f" - X.shape[1]: {X_train.shape[1]}")
-        #print(f" - y shape: {y_train.shape}")
-        #print(f" - Recent stats: {recent_stats}")
+        print(f"Some informaiton from recent_stats:")
+        #print(recent_stats.keys())
+        #print(recent_stats['feature_stats'].info())
+        print(recent_stats['feature_stats'].head())
+        soh_stats = recent_stats['feature_stats'].loc['SoH']
+        print("SoH mean:",  soh_stats['mean'])
+        print("SoH var: ",  soh_stats['var'])
+
+        # print(f" - X shape: {X_train.shape}")
+        # print(f" - X.shape[0]: {X_train.shape[0]}")
+        # print(f" - X.shape[1]: {X_train.shape[1]}")
+        
 
         # --- Convert data to PyTorch tensors ---
         #print("[DEBUG] Converting data to tensors...")
-        print(X_train.dtypes)
+        #print(X_train.dtypes)
         
         # 1) Fill NaNs so every row has a valid number
         X_train['fast_charge']        = X_train['fast_charge'].fillna(0)
@@ -161,19 +165,33 @@ def train(in_model_path, out_model_path):
             
 
         # --- Save model and metadata ---
-        
         try:
-            print("[DEBUG] Saving model and metadata...")
-            recent_stats_serializable = recent_stats.to_dict(orient='list')
+            # after calling load_data(...)
+            # 1) flatten the DataFrame of means & vars into a simple dict
+            stats_df   = recent_stats['feature_stats']
+            flat_stats = {}
+            for name, row in stats_df.iterrows():
+                flat_stats[f"{name}_mean"] = float(row['mean'])
+                flat_stats[f"{name}_var"]  = float(row['var'])
+
+            # 2) add the single forecast value
+            flat_stats['forecast_SoH_10'] = float(recent_stats['forecast_SoH_10'])
+
+            # 3) assemble metadata
             metadata = {
-                "num_examples": len(X_train_tensor),
-                "batch_size": BATCH_SIZE,
-                "epochs": EPOCHS,
+                "num_examples":  len(X_train_tensor),
+                "batch_size":    BATCH_SIZE,
+                "epochs":        EPOCHS,
                 "learning_rate": lr,
-                "recent_stats": recent_stats_serializable
-                # Add chargeing stats to metadata
-                
+                "recent_stats":  flat_stats
             }
+
+            # 4) (optional) write JSON to disk for inspection
+            with open("client_metadata.json", "w") as f:
+                json.dump(metadata, f, indent=2)
+
+            # 5) save via your helper
+            print("[DEBUG] Saving model and metadata…")
             save_metadata(metadata, out_model_path)
             save_parameters(model, out_model_path)
             print(f"[DEBUG] Training completed and saving metadata and parameters successfully. Model saved to: {out_model_path}")
