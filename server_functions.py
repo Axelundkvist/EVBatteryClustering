@@ -6,10 +6,6 @@ from fedn.network.combiner.hooks.allowed_import import Dict, List, ServerFunctio
 from fedn.common.log_config import logger
 
 
-## dessa kan du inte ta med
-#from sklearn.cluster import AffinityPropagation
-#from sklearn.metrics import silhouette_score
-
 logger = logging.getLogger(__name__)
 
 # --- Helper functions for hybrid clustering ---
@@ -29,7 +25,17 @@ class ServerFunctions(ServerFunctionsBase):
         
         self.cluster_centers = None      # type: List[np.ndarray]
         self.initial_K = 3               # pick some reasonable default
-        self.silhouette_threshold = 0.5  # ε from the paper
+        self.silhouette_threshold = 0.8  # ε from the paper
+
+        # adding from Niclas script
+        self.mode = "vanilla"
+        self.mode_schedule = {
+            0:  "log",
+            1:  "train",
+            10: "validate",
+            # add more overrides here
+        }
+        
 
     def client_selection(self, client_ids: List[str]) -> List[str]:
         print(f"[DEBUG] Selecting all {len(client_ids)} clients for the round.")
@@ -47,19 +53,17 @@ class ServerFunctions(ServerFunctionsBase):
         +
         du kan även tänka att det blir skumt och köra clustering på dina clienter om de inte har hunnit träna något heller
         '''
-        # # If no global model is available, return safe fallback settings.
-        # if global_model is None:
-        #     print("[WARNING] No global model available yet — likely no session started.")
-        #     # Return safe fallback for all clients.
-        #     return {client_id: {"learning_rate": self.lr} for client_id in self.client_clusters}
 
         # At round 0, send seed parameters; otherwise, send cluster-specific models and data instructions.
         if self.round == 0:
             print("[INFO] Sending seed model to all clients.")
+            #print("check")
             for client_id in self.client_clusters:
                 settings[client_id] = {
+                    "model":           global_model,
                     "in_model_path": "seed.npz",
-                    "learning_rate": self.lr
+                    "learning_rate": self.lr, 
+                    "mode": self.mode
                 }
         else:
             print(f"[INFO] Sending cluster-specific models, round {self.round}")
@@ -68,12 +72,16 @@ class ServerFunctions(ServerFunctionsBase):
                 settings[client_id] = {
                     # here is the asigned cluster model
                     "model": model if model is not None else global_model,
-                    
                     # updated learning rate which as of now is not changed
                     # see if you can delete learning rate
-                    "learning_rate": self.lr
+                    "learning_rate": self.lr,
+                    "mode": self.mode
                 }
         self.round += 1
+        print(f"self.client_clusters : {self.client_clusters}")
+        
+        print(list(settings.keys()))
+        print(type(settings))
         return settings
 
 
@@ -84,26 +92,35 @@ class ServerFunctions(ServerFunctionsBase):
         print(f"Function Activated! running aggregatate function")
         print(f"round = {self.round}")
         
+        
+        print("******"*10)
+        #print(f"client_updates: {client_updates}")
         client_ids = list(client_updates.keys())
-        print(f"client_ids = {client_ids}")
-        recent = meta.get("recent_stats", {})
+        #print(f"client_ids : {client_ids}")
         
         # fråga till gpt: vad betyder X? 
         X = []
         weights = []
         # för varje client
-        for cid in client_ids:
-            # fråga till gpt: params är datan från clienten?
-            # fråga till gpt: och så använder vi meta data som innehåller num_examples 
-            #                 ett sätt och disponera dess påverkan i clustermodellen senare?
-            # följdfråga till gpt: äre detta som gör att vi får 
-            
+        for i ,cid in enumerate(client_updates):
+
+            # print(f"----"*10)
+            # print(f"cid : {cid}")
             params, meta = client_updates[cid]
-            print(f"params = {params}")
-            print(f"meta = {meta}")
             
+            # print(f"params = {params}")
+            # print(f"meta = {meta}")
+            
+            # print(f"----"*10)
             # 1) flatten the model weights using your helper
-            weight_vec = self._flatten(params)  # → shape (D,)
+            
+            
+            '''this way you only take a subset of the weights layer,
+            you also achieve the private layer update part
+            '''
+            last_W = params[-2].ravel()   # assuming params[-2] is fc3.weight
+            last_b = params[-1].ravel()   # assuming params[-1] is fc3.bias
+            weight_vec = np.concatenate([last_W, last_b])
 
             # 2) extract & vectorize your recent_stats
             recent = meta.get("recent_stats", {})
@@ -138,25 +155,23 @@ class ServerFunctions(ServerFunctionsBase):
 
         # 1) fresh K-means
         labels_km, centers_km = self._kmeans(X, K)
-
+        silhouette_score = self._silhouette_scores(X, labels_km)
+        print(f"{silhouette_score}")
+        print(f"mean silhouette_score after K_means : {np.mean(silhouette_score)}")
         # 2) silhouette _on those_:
         if np.mean(self._silhouette_scores(X, labels_km)) < self.silhouette_threshold:
             # fallback to AP
-            labels, centers = self._affinity_propagation(X)
+            print(f" activating AP as the silhouette score was to low: {np.mean(silhouette_score)}")
+            labels_ap, centers_ap = self._affinity_propagation(X)
+            sil_ap   = self._silhouette_scores(X, labels_ap)
+            mean_ap  = np.mean(sil_ap)
+            print(f"silhouette scores for AP: {sil_ap}")
+            print(f"mean silhouette_score after AP: {mean_ap:.4f}")
+            
+            labels, centers = labels_ap, centers_ap
         else:
             labels, centers = labels_km, centers_km
 
-        #save the mapping
-        mapping = dict(zip(client_ids, labels.tolist()))
-        ids_arr = np.array(client_ids, dtype=object)
-        lbls_arr = np.array(labels, dtype=int)
-
-        # save to a .npz file in your working directory
-        np.savez("cluster_mapping.npz",
-                client_ids=ids_arr,
-                labels=lbls_arr)
-        logger.info(f"saved cluster mapping for {len(client_ids)} clients")
-        
         # save everything
         self.cluster_labels  = labels
         self.cluster_centers = centers
@@ -253,6 +268,7 @@ class ServerFunctions(ServerFunctionsBase):
 
     def _affinity_propagation(self, X: np.ndarray):
         """Pseudocode for Affinity Propagation (messages R, A)."""
+        print(f"X.shape : {X.shape}")
         N = len(X)
         # similarity matrix
         S = -np.linalg.norm(X[:, None, :] - X[None, :, :], axis=2)
@@ -262,14 +278,20 @@ class ServerFunctions(ServerFunctionsBase):
             # update responsibilities
             for i in range(N):
                 for j in range(N):
-                    R[i, j] = S[i, j] - np.max(A[i, :] + S[i, :], where=np.arange(N) != j)
+                    mask = np.arange(N) != j
+                    R[i, j] = S[i, j] - np.max(A[i, mask] + S[i, mask])
             # update availabilities
             for i in range(N):
                 for j in range(N):
                     if i == j:
+                        # diagonal case stays the same
                         A[j, j] = np.sum(np.maximum(0, R[:, j])) - R[j, j]
                     else:
-                        A[i, j] = min(0, R[j, j] + np.sum(np.maximum(0, R[:, j]), where=np.arange(N) != i))
+                        # off‐diagonal: slice out row i
+                        mask = np.arange(N) != i
+                        avail = R[j, j] + np.sum(np.maximum(0, R[mask, j]))
+                        A[i, j] = min(0, avail)
+
         # exemplars where R + A > 0
         exemplars = [j for j in range(N) if R[j, j] + A[j, j] > 0]
         # assign each point to nearest exemplar
@@ -279,7 +301,6 @@ class ServerFunctions(ServerFunctionsBase):
 
 #debugging purposes at the start of aggregate function
 '''vec = self._flatten(params)         # flatten list of arrays → 1D vector
-            X.append(vec)
             weights.append(meta.get("num_examples", 1))
             
             
@@ -291,6 +312,7 @@ class ServerFunctions(ServerFunctionsBase):
  
             # Log shapes of the incoming parameter arrays
             shapes = [p.shape for p in params]
+            X.append(vec)
             logger.info(f"Client {cid} sent {len(params)} arrays, shapes: {shapes}")
 
             # Dump the metadata dict (this is where your recent_stats will live)
@@ -300,254 +322,4 @@ class ServerFunctions(ServerFunctionsBase):
             stats = meta.get("recent_stats", None)
             logger.info(f"recent_stats for {cid}: {stats}")
 '''
-    
-
-
-
-'''class ServerFunctions(ServerFunctionsBase):
-    def __init__(self):
-        self.client_clusters = {}  # Dictionary to track client-cluster assignments
-        self.cluster_models = {}   # Stores models for each cluster
-        self.client_data = {}      # Stores latest updates from clients
-        self.num_clusters = 0
-        self.client_cluster_history = {}  # Dictionary to track client cluster history across rounds
-        self.current_round = 0  # Track the current round number
-        
-
-    # Called at the beginning of each round to select clients
-    def client_selection(self, client_ids: List[str]) -> List[str]:
-        print(f"[DEBUG] Selecting all {len(client_ids)} clients for the round.")
-        return client_ids
-
-    
-    @staticmethod
-    def flatten_model(model):
-        return np.concatenate([p.flatten() for p in model])
-
-    @staticmethod
-    def extract_metadata_features(metadata):
-        keys = sorted(metadata.keys())
-        return np.array([
-            float(metadata[k])
-            for k in keys
-            if isinstance(metadata[k], (int, float))
-        ])
-    
-    #this is also creating new clusters for each round isn't it?
-    
-    # add an idea of having a parameter that says which rolling mean to use
-    # like a parameter that dictates/says "use the rolling mean of the next 14 days"
-    def aggregate(self, previous_global, client_updates):
-        try:
-            logger.info("--------------------------------")
-            logger.info("[Success] ===== starting aggregate in ServerFunctions.py")
-            logger.info("--------------------------------")
-            client_ids = list(client_updates.keys())
-            cluster_clients = {}
-            
-            # Increment round counter
-            self.current_round += 1
-            print(f"[DEBUG] ===== Starting round {self.current_round} =====")
-
-            # Extract driving behavior features from metadata for clustering
-            for cid in client_ids:
-                try:
-                    metadata = client_updates[cid][1]
-                    
-                    # Extract driving behavior features
-                    driving_features = {
-                        "rms_current_1h": metadata.get("rms_current_1h_avg", 0),
-                        "rms_current_1d": metadata.get("rms_current_1d_avg", 0),
-                        "max_acceleration": metadata.get("max_acceleration_avg", 0),
-                        "avg_speed": metadata.get("avg_speed_avg", 0),
-                        "driving_aggressiveness": metadata.get("driving_aggressiveness_avg", 0),
-                        "battery_stress": metadata.get("battery_stress_avg", 0),
-                        "temperature": metadata.get("ambairtemp", 25)  # Keep temperature as a feature
-                    }
-                    
-                    # Calculate a driving behavior score for clustering
-                    # This combines multiple features into a single score
-                    driving_score = (
-                        driving_features["rms_current_1h"] * 0.2 +
-                        driving_features["rms_current_1d"] * 0.15 +
-                        driving_features["max_acceleration"] * 0.15 +
-                        driving_features["avg_speed"] * 0.1 +
-                        driving_features["driving_aggressiveness"] * 0.2 +
-                        driving_features["battery_stress"] * 0.1 +
-                        (driving_features["temperature"] - 25) * 0.1  # Normalize temperature around 25°C
-                    )
-                    
-                    print(f"[DEBUG] ===== Driving behavior score for client {cid}: {driving_score:.2f}")
-                    
-                    # Rule-based clustering by driving behavior
-                    if driving_score > 0.7:
-                        behavior_zone = "aggressive"
-                    elif driving_score < 0.3:
-                        behavior_zone = "conservative"
-                    else:
-                        behavior_zone = "moderate"
-                    
-                    # Also consider temperature for more nuanced clustering
-                    temp = driving_features["temperature"]
-                    if temp > 35:
-                        temp_zone = "hot"
-                    elif temp < 15:
-                        temp_zone = "cold"
-                    else:
-                        temp_zone = "moderate"
-                
-                    # Combine behavior and temperature for final cluster
-                    cluster_id = f"{behavior_zone}_{temp_zone}"
-                    print(f"[DEBUG] ===== Client {cid} assigned to Cluster ID: {cluster_id}")
-                    
-                    # Update current cluster assignment
-                    self.client_clusters[cid] = cluster_id
-                    
-                    # Update cluster history
-                    if cid not in self.client_cluster_history:
-                        self.client_cluster_history[cid] = {}
-                    self.client_cluster_history[cid][self.current_round] = cluster_id
-                    
-                    # Add to cluster clients list
-                    cluster_clients.setdefault(cluster_id, []).append(cid)
-                    
-                except Exception as e:
-                    print(f"[ERROR] ===== Failed to extract driving behavior features for client {cid}: {e}")
-                    continue
-
-            # --- Cluster-wise FedAvg with model persistence ---
-            # Define a decay factor for historical models (how much to weight previous models)
-            # This can be adjusted based on how much you want to preserve historical learning
-            historical_weight = 0.3  # 30% weight to historical models, 70% to new updates
-            
-            # Initialize new cluster models dictionary
-            new_cluster_models = {}
-            
-            # Process each cluster
-            for cluster_id, clients in cluster_clients.items():
-                try:
-                    # Calculate total weight for this cluster's clients
-                    total_weight = sum(client_updates[cid][1].get("num_examples", 1) for cid in clients)
-                    
-                    # Initialize aggregated model for this round
-                    aggregated_model = [np.zeros_like(param) for param in previous_global]
-                    
-                    # Aggregate client updates for this cluster
-                    for cid in clients:
-                        weight = client_updates[cid][1].get("num_examples", 1) / total_weight
-                        for i, param in enumerate(client_updates[cid][0]):
-                            aggregated_model[i] += param * weight
-                    
-                    # Check if we have a historical model for this cluster
-                    if cluster_id in self.cluster_models:
-                        print(f"[DEBUG] ===== Updating existing model for cluster {cluster_id}")
-                        # Combine historical model with new aggregated model
-                        historical_model = self.cluster_models[cluster_id]
-                        combined_model = []
-                        
-                        for i, (hist_param, new_param) in enumerate(zip(historical_model, aggregated_model)):
-                            # Weighted combination of historical and new parameters
-                            combined_param = hist_param * historical_weight + new_param * (1 - historical_weight)
-                            combined_model.append(combined_param)
-                        
-                        new_cluster_models[cluster_id] = combined_model
-                    else:
-                        print(f"[DEBUG] ===== Creating new model for cluster {cluster_id}")
-                        # If no historical model exists, just use the new aggregated model
-                        new_cluster_models[cluster_id] = aggregated_model
-                        
-                except Exception as e:
-                    print(f"[ERROR] ===== Failed aggregating cluster {cluster_id}: {e}")
-                    raise
-
-            # Update the cluster models dictionary with the new models
-            self.cluster_models = new_cluster_models
-
-            # Logging cluster summary
-            print(f"✅ Created/Updated {len(new_cluster_models)} behavior-temperature clusters.")
-            for cluster_id, clients in cluster_clients.items():
-                print(f" - Cluster '{cluster_id}' has clients: {clients}")
-                
-            # Log client cluster history
-            print("\n[INFO] Client Cluster History:")
-            for cid, history in self.client_cluster_history.items():
-                history_str = ", ".join([f"Round {round_num}: {cluster}" for round_num, cluster in history.items()])
-                print(f" - Client {cid}: {history_str}")
-
-            # Return largest cluster model (fallback model)
-            largest_cluster = max(new_cluster_models.keys(), key=lambda x: len(cluster_clients[x]))
-            return new_cluster_models[largest_cluster]
-
-        except Exception as e:
-            print(f"[ERROR] ===== Failed in aggregate(): {e}")
-            #print(f"[ERROR] ===== ")
-            raise
-
-    def get_client_cluster_history(self, client_id):
-        """
-        Retrieve the cluster history for a specific client.
-        Args:
-            client_id: The ID of the client
-        Returns:
-            A dictionary mapping round numbers to cluster IDs, or None if the client has no history
-        """
-        if client_id in self.client_cluster_history:
-            return self.client_cluster_history[client_id]
-        return None
-        
-    def get_all_clients_history(self):
-        """
-        Retrieve the cluster history for all clients.
-        Returns:
-            A dictionary mapping client IDs to their cluster history
-        """
-        return self.client_cluster_history
-
-def client_settings(self, global_model):
-    settings = {}
-
-    # If no global model is available, return safe fallback settings.
-    if global_model is None:
-        print("[WARNING] No global model available yet — likely no session started.")
-        # Return safe fallback for all clients.
-        return {client_id: {"learning_rate": self.lr} for client_id in self.client_clusters}
-
-    # Optional learning rate decay logic.
-    if self.round % 10 == 0:
-        self.lr *= 0.1
-
-    # Prepare common data orchestration parameters.
-    # For example, you can calculate a window offset: e.g., every round covers a new segment of data.
-    # Assume each round should shift the window by one day, or define a policy: e.g., "use the next 14-day segment."
-    data_orch_params = {
-        "current_round": self.round,
-        "window_offset": self.round,      # Example: current round number as a shift in days
-        "orchestrate": True, 
-        "number_of_cycles_to_compare": 10 # A flag to indicate that data orchestration is active
-        #"window_length": 28,              # commenting our window lenght as that is arbitrary
-    }
-
-    # At round 0, send seed parameters; otherwise, send cluster-specific models and data instructions.
-    if self.round == 0:
-        print("[INFO] Sending seed model to all clients.")
-        for client_id in self.client_clusters:
-            settings[client_id] = {
-                "in_model_path": "seed.npz",
-                "learning_rate": self.lr,
-                "data_orch_params": data_orch_params  # Include our orchestration parameters
-            }
-    else:
-        print(f"[INFO] Sending cluster-specific models, round {self.round}")
-        for client_id, cluster_id in self.client_clusters.items():
-            model = self.cluster_models.get(cluster_id)
-            settings[client_id] = {
-                "model": model if model is not None else global_model,
-                "learning_rate": self.lr,
-                "data_orch_params": data_orch_params  # Include orchestration params for each client
-            }
-    self.round += 1
-    return settings
-'''
-
-
     
