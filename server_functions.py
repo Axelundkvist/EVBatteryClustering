@@ -171,6 +171,13 @@ class ServerFunctions(ServerFunctionsBase):
             labels, centers = labels_ap, centers_ap
         else:
             labels, centers = labels_km, centers_km
+            
+        clusters = {}
+        for cid, lbl in zip(client_ids, labels):
+            clusters.setdefault(lbl, []).append(cid)
+        print("→ Cluster assignments this round:")
+        for lbl, members in clusters.items():
+            print(f"   Cluster {lbl}: {members}")
 
         # save everything
         self.cluster_labels  = labels
